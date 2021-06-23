@@ -5,6 +5,10 @@
   "repository": "git@github.com:ilhamalamsyh/kuycook-api.git",
   "author": "Ilham Alamsyah <ilhamalamsyah510@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "dev":"nodemon index.js",
+    "start":"node index.js"
+  },
   "dependencies": {
     "apollo-server-express": "^2.25.2",
     "bcryptjs": "^2.4.3",
