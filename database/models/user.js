@@ -59,15 +59,20 @@ module.exports = (sequelize, DataTypes) => {
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        field: 'created_at',
+        defaultValue: DataTypes.NOW,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        field: 'updated_at',
+        defaultValue: DataTypes.NOW,
       },
       deletedAt: {
         allowNull:true,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        field: 'deleted_at'
       }
     },
     {
