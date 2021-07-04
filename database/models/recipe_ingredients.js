@@ -19,7 +19,7 @@ module.exports = (DataTypes, sequelize) => {
         allowNull: false,
       },
       recipeId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
       },
       createdAt: {
