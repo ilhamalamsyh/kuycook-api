@@ -76,7 +76,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     {
-      tableName: 'Users',
+      tableName: 'users',
       defaultScope:{
         rawAttributes:{exclude: ['password']},
       }
