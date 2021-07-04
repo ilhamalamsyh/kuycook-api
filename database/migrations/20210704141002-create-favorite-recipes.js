@@ -9,11 +9,11 @@ module.exports = {
         type: Sequelize.INTEGER.UNSIGNED
       },
       userId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
       },
       recipeId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
       },
       createdAt: {
