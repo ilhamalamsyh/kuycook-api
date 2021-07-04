@@ -12,28 +12,32 @@ module.exports = (DataTypes, sequelize) => {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER.UNSIGNED
+        type: DataTypes.INTEGER.UNSIGNED
       },
       ingredient: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       recipeId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        field: 'created_at'
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        field: 'updated_at'
       },
       deletedAt: {
         allowNull: true,
-        type: Sequelize.DATE,
-        
+        type: DataTypes.DATE,
+        field: 'deleted_at'
       },
     },
     {

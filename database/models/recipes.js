@@ -3,33 +3,6 @@
 const { DataTypes } = require("sequelize/types");
 const { sequelize } = require(".");
 
-// const {
-//   Model
-// } = require('sequelize');
-// module.exports = (sequelize, DataTypes) => {
-//   class Recipes extends Model {
-//     /**
-//      * Helper method for defining associations.
-//      * This method is not a part of Sequelize lifecycle.
-//      * The `models/index` file will call this method automatically.
-//      */
-//     static associate(models) {
-//       // define association here
-//     }
-//   };
-//   Recipes.init({
-//     title: DataTypes.STRING,
-//     description: DataTypes.TEXT,
-//     isFavorite: DataTypes.BOOLEAN,
-//     deletedAt: DataTypes.DATE,
-//     userId: DataTypes.INTEGER
-//   }, {
-//     sequelize,
-//     modelName: 'Recipes',
-//   });
-//   return Recipes;
-// };
-
 module.exports = (sequelize, DataTypes) => {
   const Recipe = sequelize.define(
     'Recipe',
@@ -45,32 +18,32 @@ module.exports = (sequelize, DataTypes) => {
         allowNull:false
       },
       description: {
-        type: Sequelize.TEXT,
+        type: DataTypes.TEXT,
         allowNull:false
       },
       isFavorite: {
-        type: Sequelize.BOOLEAN,
+        type: DataTypes.BOOLEAN,
         allowNull:false,
         defaultValue: false
       },
       userId: {
-        type: Sequelize.INTEGER.UNSIGNED,
+        type: DataTypes.INTEGER.UNSIGNED,
         allowNull:false
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         field: 'created_at'
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         field: 'created_at'
       },
       deletedAt: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: true,
         field: 'deleted_at'
       },

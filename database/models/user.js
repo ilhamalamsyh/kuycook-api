@@ -4,33 +4,6 @@ const { DataTypes } = require("sequelize/types");
 const { sequelize } = require(".");
 const bcrypt = require('bcryptjs');
 
-// const {
-//   Model
-// } = require('sequelize');
-// module.exports = (sequelize, DataTypes) => {
-//   class User extends Model {
-//     /**
-//      * Helper method for defining associations.
-//      * This method is not a part of Sequelize lifecycle.
-//      * The `models/index` file will call this method automatically.
-//      */
-//     static associate(models) {
-//       // define association here
-//     }
-//   };
-//   User.init({
-//     fullname: DataTypes.STRING,
-//     gender: DataTypes.STRING,
-//     password: DataTypes.STRING,
-//     email: DataTypes.STRING,
-//     deletedAt: DataTypes.DATE
-//   }, {
-//     sequelize,
-//     modelName: 'User',
-//   });
-//   return User;
-// };
-
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
     'User',
@@ -46,32 +19,32 @@ module.exports = (sequelize, DataTypes) => {
         allowNull:false
       },
       gender: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull:false
       },
       password: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull:false
       },
       email: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull:false
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         field: 'created_at',
         defaultValue: DataTypes.NOW,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         field: 'updated_at',
         defaultValue: DataTypes.NOW,
       },
       deletedAt: {
         allowNull:true,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         field: 'deleted_at'
       }
     },
