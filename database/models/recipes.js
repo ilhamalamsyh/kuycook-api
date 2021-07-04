@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
-        field: 'created_at'
+        field: 'updated_at'
       },
       deletedAt: {
         type: DataTypes.DATE,
@@ -52,6 +52,5 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'recipes'
     }
   );
-
   return Recipe;
 }
