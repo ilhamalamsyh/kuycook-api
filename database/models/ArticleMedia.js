@@ -20,6 +20,12 @@ module.exports = (sequelize, DataTypes) => {
       articleId: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
+        references: {
+          model: {
+            tableName: 'articles'
+          },
+          key: 'id'
+        }
       },
       createdAt: {
         allowNull: false,
@@ -42,6 +48,12 @@ module.exports = (sequelize, DataTypes) => {
     {
       tableName: 'article_medias'
     }
-  )
+  );
+  ArticleMedia.association = function (models) {
+    ArticleMedia.belongsTo(models.Article, {
+      foreignKey: 'articleId',
+      as: 'article'
+    });
+  }
   return ArticleMedia;
 }

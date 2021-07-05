@@ -68,8 +68,11 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   // define relationship a user has many recipes
-  // User.associate = function (models) {
-  //   User.hasMany(models.Recipe, {})
-  // }
+  User.associate = function (models) {
+    User.hasMany(models.Recipe, {
+      foreignKey: 'userId',
+      as: 'recipe'
+    })
+  }
   return User;
 }

@@ -2,6 +2,7 @@
 
 const { DataTypes } = require("sequelize/types");
 const { sequelize } = require(".");
+const Recipe = require("./Recipe");
 
 module.exports = (sequelize, DataTypes) => {
   const FavoriteRecipe = sequelize.define(
@@ -16,10 +17,22 @@ module.exports = (sequelize, DataTypes) => {
       userId: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
+        references: {
+          model: {
+            tableName: 'users'
+          },
+          key: 'id'
+        }
       },
       recipeId: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
+        references: {
+          model: {
+            tableName: 'recipes'
+          },
+          key: 'id'
+        }
       },
       createdAt: {
         type: DataTypes.DATE,
@@ -42,6 +55,12 @@ module.exports = (sequelize, DataTypes) => {
     {
       tableName: 'favorite_recipes'
     }
-  )
+  );
+  FavoriteRecipe.association = function (models) {
+    FavoriteRecipe.belongsTo(models.Recipe, {
+      foreignKey: 'recipeId',
+      as: 'recipe'
+    });
+  }
   return FavoriteRecipe;
 }

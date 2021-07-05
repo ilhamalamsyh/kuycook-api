@@ -28,7 +28,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       userId: {
         type: DataTypes.INTEGER.UNSIGNED,
-        allowNull:false
+        allowNull:false,
+        references:{
+          model:{
+            tableName: 'users'
+          },
+          key: 'id'
+        }
       },
       createdAt: {
         allowNull: false,
@@ -52,5 +58,12 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'recipes'
     }
   );
+  Recipe.associate = function (models) {
+    Recipe.belongsTo(models.User, {foreignKey: 'userId', as:'author'}),
+    Recipe.hasMany(models.RecipeIngredient, {foreignKey: 'recipeId', as:'recipe_ingredient'}),
+    Recipe.hasMany(models.RecipeInstruction, {foreignKey: 'recipeId', as:'recipe_instruction'}),
+    Recipe.hasOne(models.FavoriteRecipe, {foreignKey: 'recipeId', as: 'favorite_recipe'})
+    Recipe.hasOne(models.RecipeMedia, {foreignKey: 'recipeId', as: 'recipe_media'})
+  }
   return Recipe;
 }

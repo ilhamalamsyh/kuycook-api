@@ -19,7 +19,13 @@ module.exports=(DataTypes, sequelize) => {
       },
       recipeId: {
         type: DataTypes.INTEGER.UNSIGNED,
-        allowNull:false
+        allowNull:false,
+        references: {
+          model: {
+            tableName: 'recipes'
+          },
+          key: 'id'
+        }
       },
       createdAt: {
         allowNull: false,
@@ -42,6 +48,12 @@ module.exports=(DataTypes, sequelize) => {
     {
       tableName: 'recipe_instructions'
     }
-  )
+  );
+  RecipeInstruction.association = function(models) {
+    RecipeInstruction.belongsTo(models.Recipe, {
+      foreignKey: 'recipeId',
+      as: 'recipe'
+    });
+  }
   return RecipeInstruction;
 }

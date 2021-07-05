@@ -42,6 +42,12 @@ module.exports = (sequelize, DataTypes) => {
     {
       tableName: 'articles'
     }
-  )
+  );
+  Article.association = function (models) {
+    Article.hasMany(models.ArticleMedia, {
+      foreignKey: 'articleId',
+      as: 'article_media'
+    });
+  }
   return Article;
 }

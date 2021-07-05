@@ -20,6 +20,12 @@ module.exports = (sequelize, DataTypes) => {
       recipeId: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
+        references: {
+          model: {
+            tableName: 'recipes'
+          },
+          key: 'id'
+        }
       },
       createdAt: {
         allowNull: false,
@@ -42,6 +48,12 @@ module.exports = (sequelize, DataTypes) => {
     {
       tableName: 'recipe_medias'
     }
-  )
+  );
+  RecipeMedia.associate = function (models) {
+    RecipeMedia.belongsTo(models.Recipe, {
+      foreignKey: 'recipeId',
+      as: 'recipe'
+    });
+  }
   return RecipeMedia;
 }
