@@ -24,17 +24,19 @@ module.exports = {
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        field: 'created_at'
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        field: 'updated_at'
       },
       deletedAt: {
-        allowNull: true,
+        allowNull:true,
         type: Sequelize.DATE,
-        
-      },
+        field: 'deleted_at'
+      }
     });
   },
   down: async (queryInterface, Sequelize) => {
