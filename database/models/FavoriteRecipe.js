@@ -17,22 +17,10 @@ module.exports = (sequelize, DataTypes) => {
       userId: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
-        references: {
-          model: {
-            tableName: 'users'
-          },
-          key: 'id'
-        }
       },
       recipeId: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
-        references: {
-          model: {
-            tableName: 'recipes'
-          },
-          key: 'id'
-        }
       },
       createdAt: {
         type: DataTypes.DATE,

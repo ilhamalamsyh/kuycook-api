@@ -23,6 +23,12 @@ module.exports = {
       userId: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
+        references:{
+          model:{
+            tableName: 'users'
+          },
+          key: 'id'
+        },
       },
       createdAt: {
         allowNull: false,

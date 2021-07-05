@@ -11,10 +11,22 @@ module.exports = {
       userId: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
+        references: {
+          model: {
+            tableName: 'users'
+          },
+          key: 'id'
+        }
       },
       recipeId: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
+        references: {
+          model: {
+            tableName: 'recipes'
+          },
+          key: 'id'
+        }
       },
       createdAt: {
         type: Sequelize.DATE,

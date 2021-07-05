@@ -20,12 +20,6 @@ module.exports = (sequelize, DataTypes) => {
       articleId: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
-        references: {
-          model: {
-            tableName: 'articles'
-          },
-          key: 'id'
-        }
       },
       createdAt: {
         allowNull: false,

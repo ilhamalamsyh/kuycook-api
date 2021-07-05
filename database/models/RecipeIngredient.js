@@ -21,12 +21,6 @@ module.exports = (DataTypes, sequelize) => {
       recipeId: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
-        references: {
-          model: {
-            tableName: 'recipes'
-          },
-          key: 'id'
-        }
       },
       createdAt: {
         allowNull: false,

@@ -15,6 +15,12 @@ module.exports = {
       articleId: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
+        references: {
+          model: {
+            tableName: 'articles'
+          },
+          key: 'id'
+        }
       },
       createdAt: {
         allowNull: false,
