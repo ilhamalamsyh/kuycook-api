@@ -19,7 +19,7 @@ module.exports = gql`
         register(input: UserRegisterInput!):UserRegisterResponse
         login(input: UserLoginInput!):UserLoginResponse
 
-        updateUser(input: UpdateUser!):User
+        updateUser(input: UpdateUser!):UserDetail
     }
 
     input UserRegisterInput{
@@ -56,5 +56,20 @@ module.exports = gql`
         createdAt: Date!
         updatedAt: Date!
         deletedAt: Date
+    }
+
+    type UserDetail{
+        type User{
+        id: Int!
+        name: String!
+        gender: String!
+        email: String!
+        createdAt: Date!
+        updatedAt: Date!
+        deletedAt: Date
+        recipes: [Recipe!]
+        favoriteRecipe: [FavoriteRecipe!]
+    }
+
     }
 `;
