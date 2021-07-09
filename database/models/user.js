@@ -1,7 +1,6 @@
 'use strict';
 
-const { DataTypes } = require("sequelize/types");
-const { sequelize } = require(".");
+const Sequelize = require('sequelize');
 const bcrypt = require('bcryptjs');
 
 module.exports = (sequelize, DataTypes) => {
@@ -34,13 +33,13 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.DATE,
         field: 'created_at',
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
         field: 'updated_at',
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.NOW,
       },
       deletedAt: {
         allowNull:true,
