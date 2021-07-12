@@ -1,36 +1,36 @@
 const { gql } = require('apollo-server-express');
 
 module.exports = gql`
+scalar Date
 
     type User{
         id: Int!
-        name: String!
+        fullname: String!
         gender: String!
         email: String!
-        password: String!
         createdAt: Date!
         updatedAt: Date!
         deletedAt: Date
-        recipes: [Recipe!]
-        favoriteRecipe: [FavoriteRecipe!]
+        recipes: String#[Recipe!]
+        favoriteRecipe: String#[FavoriteRecipe!]
     }
 
     extend type Mutation{
         register(input: UserRegisterInput!):UserRegisterResponse
         login(input: UserLoginInput!):UserLoginResponse
 
-        updateUser(input: UpdateUser!):UserDetail
+        userUpdate(id: ID!, input: UserUpdate!):User
     }
 
     input UserRegisterInput{
-        name: String!
+        fullname: String!
         email: String!
         password: String!
         gender: String!
     }
 
     type UserRegisterResponse{
-        name: String!
+        fullname: String!
         email: String!
         gender: String!
     }
@@ -42,34 +42,31 @@ module.exports = gql`
 
     type UserLoginResponse{
         id: Int!
-        name: String!
+        fullname: String!
         email: String!
         gender: String!
+        token: String!
     }
 
-    input UpdateUser{
-        id:ID!
-        name: String
+    input UserUpdate{
+        fullname: String
         email: String
         password: String
         gender: String
-        createdAt: Date!
-        updatedAt: Date!
+        createdAt: Date
+        updatedAt: Date
         deletedAt: Date
     }
 
     type UserDetail{
-        type User{
         id: Int!
-        name: String!
-        gender: String!
-        email: String!
-        createdAt: Date!
-        updatedAt: Date!
+        fullname: String
+        gender: String
+        email: String
+        createdAt: Date
+        updatedAt: Date
         deletedAt: Date
-        recipes: [Recipe!]
-        favoriteRecipe: [FavoriteRecipe!]
-    }
-
+        recipes: String#[Recipe!]
+        favoriteRecipe: String#[FavoriteRecipe!]
     }
 `;
