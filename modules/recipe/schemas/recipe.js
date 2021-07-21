@@ -1,8 +1,6 @@
 const { gql } = require('apollo-server-express');
 
 module.exports = gql`
-    scalar Data
-
     type Recipe {
         id: ID!
         title: String
