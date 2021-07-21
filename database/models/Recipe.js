@@ -51,11 +51,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Recipe.associate = function (models) {
-    Recipe.belongsTo(models.User, {foreignKey: 'userId', as:'author'}),
-    Recipe.hasMany(models.RecipeIngredient, {foreignKey: 'recipeId', as:'recipe_ingredient'}),
-    Recipe.hasMany(models.RecipeInstruction, {foreignKey: 'recipeId', as:'recipe_instruction'}),
-    Recipe.hasOne(models.FavoriteRecipe, {foreignKey: 'recipeId', as: 'favorite_recipe'})
-    Recipe.hasOne(models.RecipeMedia, {foreignKey: 'recipeId', as: 'recipe_media'})
+    Recipe.belongsTo(models.User, {foreignKey: 'userId', as:'User'}),
+    Recipe.hasMany(models.RecipeIngredient, {foreignKey: 'recipeId', as:'ingredients'}),
+    Recipe.hasMany(models.RecipeInstruction, {foreignKey: 'recipeId', as:'instructions'}),
+    Recipe.hasOne(models.FavoriteRecipe, {foreignKey: 'recipeId', as: 'favoriteRecipes'})
+    Recipe.hasOne(models.RecipeMedia, {foreignKey: 'recipeId', as: 'image'})
   }
   return Recipe;
 }
