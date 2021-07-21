@@ -9,16 +9,13 @@ module.exports = {
         recipeList: async (root, args, { user }) => {
             try {
                 const userId = user.id;
-                return Recipe.findAll(
-                    {
-                        logging: console.log,
+                return Recipe.findAll({
                         include:[
                         {
                             model: User,
                             as: 'User',
                             where: {id: userId}
-                        },
-                        {
+                        },{
                             model: RecipeIngredient,
                             as: 'ingredients',
                             required: true,
@@ -33,9 +30,8 @@ module.exports = {
                         }]
                     });
             } catch (error) {
-                throw new Error();
+                throw new Error(error);
             }
-            
         },
 
         recipeDetail: async (_, { id }, { user }) => {
@@ -62,7 +58,7 @@ module.exports = {
                     }]
                 });   
             } catch (error) {
-                throw new Error();
+                throw new Error(error);
             }
         }
     },
