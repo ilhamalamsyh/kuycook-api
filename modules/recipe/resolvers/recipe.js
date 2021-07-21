@@ -6,7 +6,7 @@ const { AuthenticationError, UserInputError } = require('apollo-server-express')
 
 module.exports = {
     Query: {
-        getAllRecipes: async (root, args, { user }) => {
+        recipeList: async (root, args, { user }) => {
             try {
                 const userId = user.id;
                 return Recipe.findAll(
@@ -38,7 +38,7 @@ module.exports = {
             
         },
 
-        getRecipeDetail: async (_, { id }, { user }) => {
+        recipeDetail: async (_, { id }, { user }) => {
             try {
                 userId = user.id;
                 return Recipe.findByPk(id,{

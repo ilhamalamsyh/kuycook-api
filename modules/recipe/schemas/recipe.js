@@ -23,8 +23,8 @@ module.exports = gql`
     }
 
     extend type Query {
-        getAllRecipes: [Recipe]
-        getRecipeDetail(id: ID!): Recipe
+        recipeList: [Recipe]
+        recipeDetail(id: ID!): Recipe
     }
 
     type RecipeInstruction {
