@@ -25,15 +25,20 @@ module.exports = {
       const user = await User.findOne({ where: { email } });
       console.log(user.password);
 
-      if (user && bcrypt.compareSync(password, user.password)) {
-        const token = jwt.sign({ id: user.id }, "mysecret", {
-          expiresIn: "1d",
-        });
-        return { ...user.toJSON(), token };
+      //TODO:Add validation of login
+      const { email, password } = input;
+      const user = await User.findOne({ where: { email } });
+
+      try {
+        if (user && bcrypt.compareSync(password, user.password)) {
+          const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+            expiresIn: process.env.JWT_EXPIRES_IN,
+          });
+          return { ...user.toJSON(), token };
+        }
+      } catch (error) {
+        throw new AuthenticationError("Invalid Credential");
       }
-      console.log(user.password);
-      console.log(password);
-      throw new AuthenticationError("Invalid Credential");
     },
 
     // updateUser: async (root, { id, input }, context) => {
@@ -61,9 +66,8 @@ module.exports = {
       try {
         const { fullname, email, password, gender } = input;
         const user = await User.findByPk(id);
-        console.log(user);
         if (!user) {
-          throw new ApolloError({ message: "User not found" });
+          throw new ApolloError("User not found");
         }
 
         const userUpdated = await user.update({
@@ -74,7 +78,7 @@ module.exports = {
         });
         return userUpdated;
       } catch (error) {
-        throw new Error(`something went wrong: ${error}`);
+        throw new Error(`Failed update user: ${error}`);
       }
     },
   },
