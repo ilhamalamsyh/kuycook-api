@@ -41,26 +41,6 @@ module.exports = {
       }
     },
 
-    // updateUser: async (root, { id, input }, context) => {
-    //     const { fullname, password, email, gender } = input;
-    //     console.log(id);
-    //     try {
-    //         // if (!user) {
-    //         //     throw new AuthenticationError('You must login to update a user');
-    //         // }
-    //         return await User && User.update({
-    //             fullname,
-    //             email,
-    //             password,
-    //             gender
-    //         }, {where: {id: id}});
-    //         console.log(`UserUpdate: ${user}`);
-
-    //     } catch (error) {
-    //         throw new Error(`something went wrong: ${error}`)
-    //     }
-    // }
-
     userUpdate: async (parent, { id, input }, context) => {
       //TODO:Add validation of updateUser
       try {
@@ -83,3 +63,23 @@ module.exports = {
     },
   },
 };
+
+// updateUser: async (root, { id, input }, context) => {
+//     const { fullname, password, email, gender } = input;
+//     console.log(id);
+//     try {
+//         // if (!user) {
+//         //     throw new AuthenticationError('You must login to update a user');
+//         // }
+//         return await User && User.update({
+//             fullname,
+//             email,
+//             password,
+//             gender
+//         }, {where: {id: id}});
+//         console.log(`UserUpdate: ${user}`);
+
+//     } catch (error) {
+//         throw new Error(`something went wrong: ${error}`)
+//     }
+// }
