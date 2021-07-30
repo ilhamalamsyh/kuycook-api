@@ -50,7 +50,6 @@ module.exports = {
             },
           ],
         });
-        console.log("reseplist: ", resep);
         return resep;
       } catch (error) {
         throw new Error(error);
@@ -98,7 +97,6 @@ module.exports = {
       t = await sequelize.transaction();
       const userId = user.id;
       let { title, description, ingredients, instructions, image } = args.input;
-
       let recipe = null;
 
       try {
