@@ -4,7 +4,6 @@ const { AuthenticationError } = require("apollo-server-express");
 const { ApolloError } = require("apollo-server-errors");
 
 const { User } = require("../../../database/models");
-const user = require("../schemas/user");
 
 module.exports = {
   Mutation: {
@@ -23,12 +22,6 @@ module.exports = {
       //TODO:Add validation of login
       const { email, password } = input;
       const user = await User.findOne({ where: { email } });
-      console.log(user.password);
-
-      //TODO:Add validation of login
-      const { email, password } = input;
-      const user = await User.findOne({ where: { email } });
-
       try {
         if (user && bcrypt.compareSync(password, user.password)) {
           const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
