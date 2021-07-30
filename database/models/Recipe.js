@@ -1,7 +1,5 @@
 'use strict';
-
-const { DataTypes } = require("sequelize/types");
-const { sequelize } = require(".");
+const Sequelize = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   const Recipe = sequelize.define(
@@ -33,13 +31,13 @@ module.exports = (sequelize, DataTypes) => {
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.NOW,
         field: 'created_at'
       },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.NOW,
         field: 'updated_at'
       },
       deletedAt: {
@@ -53,11 +51,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Recipe.associate = function (models) {
-    Recipe.belongsTo(models.User, {foreignKey: 'userId', as:'author'}),
-    Recipe.hasMany(models.RecipeIngredient, {foreignKey: 'recipeId', as:'recipe_ingredient'}),
-    Recipe.hasMany(models.RecipeInstruction, {foreignKey: 'recipeId', as:'recipe_instruction'}),
-    Recipe.hasOne(models.FavoriteRecipe, {foreignKey: 'recipeId', as: 'favorite_recipe'})
-    Recipe.hasOne(models.RecipeMedia, {foreignKey: 'recipeId', as: 'recipe_media'})
+    Recipe.belongsTo(models.User, {foreignKey: 'userId', as:'User'}),
+    Recipe.hasMany(models.RecipeIngredient, {foreignKey: 'recipeId', as:'ingredients'}),
+    Recipe.hasMany(models.RecipeInstruction, {foreignKey: 'recipeId', as:'instructions'}),
+    Recipe.hasOne(models.FavoriteRecipe, {foreignKey: 'recipeId', as: 'favoriteRecipes'})
+    Recipe.hasOne(models.RecipeMedia, {foreignKey: 'recipeId', as: 'image'})
   }
   return Recipe;
 }

@@ -1,17 +1,16 @@
-'use strict';
+"use strict";
 
-const { DataTypes } = require("sequelize/types");
-const { sequelize } = require(".");
+const Sequelize = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   const RecipeMedia = sequelize.define(
-    'RecipeMedia',
+    "RecipeMedia",
     {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: DataTypes.INTEGER.UNSIGNED
+        type: DataTypes.INTEGER.UNSIGNED,
       },
       url: {
         type: DataTypes.STRING,
@@ -24,30 +23,30 @@ module.exports = (sequelize, DataTypes) => {
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-        field: 'created_at'
+        defaultValue: Sequelize.NOW,
+        field: "created_at",
       },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-        field: 'updated_at'
+        defaultValue: Sequelize.NOW,
+        field: "updated_at",
       },
       deletedAt: {
-        allowNull: false,
+        allowNull: true,
         type: DataTypes.DATE,
-        field: 'deleted_at'
+        field: "deleted_at",
       },
     },
     {
-      tableName: 'recipe_medias'
+      tableName: "recipe_medias",
     }
   );
   RecipeMedia.associate = function (models) {
     RecipeMedia.belongsTo(models.Recipe, {
-      foreignKey: 'recipeId',
-      as: 'recipe'
+      foreignKey: "recipeId",
+      as: "recipe",
     });
-  }
+  };
   return RecipeMedia;
-}
+};

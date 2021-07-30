@@ -1,7 +1,5 @@
 'use strict';
-
-const { DataTypes } = require("sequelize/types");
-const { sequelize } = require(".");
+const Sequelize = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   const ArticleMedia = sequelize.define(
@@ -24,13 +22,13 @@ module.exports = (sequelize, DataTypes) => {
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.NOW,
         field: 'created_at'
       },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.NOW,
         field: 'updated_at'
       },
       deletedAt: {
