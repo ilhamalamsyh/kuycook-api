@@ -239,7 +239,6 @@ module.exports = {
         await RecipeMedia.update(
           {
             url: image,
-            id,
           },
           { where: { id: recipe.image.id }, transaction: t }
         );
