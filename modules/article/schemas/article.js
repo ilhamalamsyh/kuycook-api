@@ -11,32 +11,32 @@ module.exports = gql`
     deletedAt: Date
   }
 
-  extend type Query{
-      articleList: [Article]
-      articleDetail(id:ID!): Article
+  extend type Query {
+    articleList: [Article]
+    articleDetail(id: ID!): Article
   }
 
-  extend type Mutation{
-    articleCreate(input: ArticleInput!):Article
-    articleUpdate: (id: ID!, input:ArticleInput!):Article
-    articleDelete(id:ID!):Article
+  extend type Mutation {
+    articleCreate(input: ArticleInput!): Article
+    articleUpdate(id: ID!, input: ArticleInput!): Article
+    articleDelete(id: ID!): Article
   }
 
-  input ArticleInput{
-      title: String!
-      description: String!
-      image: String!
-      createdAt: Date
-      updatedAt: Date
-      deletedAt: Date
+  input ArticleInput {
+    title: String!
+    description: String!
+    image: String
+    createdAt: Date
+    updatedAt: Date
+    deletedAt: Date
   }
 
-  type ArticleMedia{
-      id: ID
-      url: String
-      recipeId: ID
-      createdAt:Date
-      updatedAt:Date
-      deletedAt:Date
+  type ArticleMedia {
+    id: ID
+    url: String
+    articleId: ID
+    createdAt: Date
+    updatedAt: Date
+    deletedAt: Date
   }
 `;
