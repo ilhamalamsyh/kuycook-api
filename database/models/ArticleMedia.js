@@ -1,15 +1,15 @@
-'use strict';
-const Sequelize = require('sequelize');
+"use strict";
+const Sequelize = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   const ArticleMedia = sequelize.define(
-    'ArticleMedia',
+    "ArticleMedia",
     {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: DataTypes.INTEGER.UNSIGNED
+        type: DataTypes.INTEGER.UNSIGNED,
       },
       url: {
         type: DataTypes.STRING,
@@ -23,29 +23,29 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: Sequelize.NOW,
-        field: 'created_at'
+        field: "created_at",
       },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: Sequelize.NOW,
-        field: 'updated_at'
+        field: "updated_at",
       },
       deletedAt: {
         allowNull: true,
         type: DataTypes.DATE,
-        field: 'deleted_at'
+        field: "deleted_at",
       },
-    }, 
+    },
     {
-      tableName: 'article_medias'
+      tableName: "article_medias",
     }
   );
-  ArticleMedia.association = function (models) {
+  ArticleMedia.associate = function (models) {
     ArticleMedia.belongsTo(models.Article, {
-      foreignKey: 'articleId',
-      as: 'article'
+      foreignKey: "articleId",
+      as: "article",
     });
-  }
+  };
   return ArticleMedia;
-}
+};
