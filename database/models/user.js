@@ -1,62 +1,62 @@
-'use strict';
+"use strict";
 
-const Sequelize = require('sequelize');
-const bcrypt = require('bcryptjs');
+const Sequelize = require("sequelize");
+const bcrypt = require("bcryptjs");
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
-    'User',
+    "User",
     {
-      id:{
+      id: {
         type: DataTypes.INTEGER.UNSIGNED,
         primaryKey: true,
-        autoIncrement:true,
-        allowNull:false
+        autoIncrement: true,
+        allowNull: false,
       },
-      fullname:{
+      fullname: {
         type: DataTypes.STRING,
-        allowNull:false
+        allowNull: false,
       },
       gender: {
         type: DataTypes.STRING,
-        allowNull:false
+        allowNull: false,
       },
       password: {
         type: DataTypes.STRING,
-        allowNull:false
+        allowNull: false,
       },
       email: {
         type: DataTypes.STRING,
-        allowNull:false
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        field: 'created_at',
+        field: "created_at",
         defaultValue: Sequelize.NOW,
       },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
-        field: 'updated_at',
+        field: "updated_at",
         defaultValue: Sequelize.NOW,
       },
       deletedAt: {
-        allowNull:true,
+        allowNull: true,
         type: DataTypes.DATE,
-        field: 'deleted_at'
-      }
+        field: "deleted_at",
+      },
     },
     {
-      tableName: 'users',
-      defaultScope:{
-        rawAttributes:{exclude: ['password']},
-      }
+      tableName: "users",
+      defaultScope: {
+        rawAttributes: { exclude: ["password"] },
+      },
     }
   );
 
   // Added beforeCreate hook which automatically hashes the password using bcrypt.js under the hood
-  User.beforeCreate(async (user) => {
+  User.beforeCreate(async user => {
     user = await user.generatedPasswordHash();
   });
 
@@ -69,9 +69,9 @@ module.exports = (sequelize, DataTypes) => {
   // define relationship a user has many recipes
   User.associate = function (models) {
     User.hasMany(models.Recipe, {
-      foreignKey: 'userId',
-      as: 'recipe'
-    })
-  }
+      foreignKey: "userId",
+      as: "recipe",
+    });
+  };
   return User;
-}
+};

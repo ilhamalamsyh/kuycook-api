@@ -1,52 +1,52 @@
-'use strict';
+"use strict";
 
-const Sequelize = require('sequelize');
+const Sequelize = require("sequelize");
 
-module.exports=(sequelize, DataTypes) => {
+module.exports = (sequelize, DataTypes) => {
   const RecipeInstruction = sequelize.define(
-    'RecipeInstruction',
+    "RecipeInstruction",
     {
-      id:{
+      id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: DataTypes.INTEGER.UNSIGNED
+        type: DataTypes.INTEGER.UNSIGNED,
       },
       instruction: {
         type: DataTypes.STRING,
-        allowNull:false
+        allowNull: false,
       },
       recipeId: {
         type: DataTypes.INTEGER.UNSIGNED,
-        allowNull:false,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: Sequelize.NOW,
-        field: 'created_at'
+        field: "created_at",
       },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: Sequelize.NOW,
-        field: 'updated_at'
+        field: "updated_at",
       },
       deletedAt: {
         allowNull: true,
         type: DataTypes.DATE,
-        field: 'deleted_at'
+        field: "deleted_at",
       },
     },
     {
-      tableName: 'recipe_instructions'
+      tableName: "recipe_instructions",
     }
   );
-  RecipeInstruction.association = function(models) {
+  RecipeInstruction.association = function (models) {
     RecipeInstruction.belongsTo(models.Recipe, {
-      foreignKey: 'recipeId',
-      as: 'recipe'
+      foreignKey: "recipeId",
+      as: "recipe",
     });
-  }
+  };
   return RecipeInstruction;
-}
+};
