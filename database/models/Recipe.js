@@ -1,61 +1,70 @@
-'use strict';
-const Sequelize = require('sequelize');
+"use strict";
+const Sequelize = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   const Recipe = sequelize.define(
-    'Recipe',
+    "Recipe",
     {
       id: {
         type: DataTypes.INTEGER.UNSIGNED,
         primaryKey: true,
-        autoIncrement:true,
-        allowNull:false
+        autoIncrement: true,
+        allowNull: false,
       },
       title: {
         type: DataTypes.STRING,
-        allowNull:false
+        allowNull: false,
       },
       description: {
         type: DataTypes.TEXT,
-        allowNull:false
+        allowNull: false,
       },
       isFavorite: {
         type: DataTypes.BOOLEAN,
-        allowNull:false,
-        defaultValue: false
+        allowNull: false,
+        defaultValue: false,
       },
       userId: {
         type: DataTypes.INTEGER.UNSIGNED,
-        allowNull:false,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: Sequelize.NOW,
-        field: 'created_at'
+        field: "created_at",
       },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: Sequelize.NOW,
-        field: 'updated_at'
+        field: "updated_at",
       },
       deletedAt: {
         type: DataTypes.DATE,
         allowNull: true,
-        field: 'deleted_at'
+        field: "deleted_at",
       },
     },
     {
-      tableName: 'recipes'
+      tableName: "recipes",
     }
   );
   Recipe.associate = function (models) {
-    Recipe.belongsTo(models.User, {foreignKey: 'userId', as:'User'}),
-    Recipe.hasMany(models.RecipeIngredient, {foreignKey: 'recipeId', as:'ingredients'}),
-    Recipe.hasMany(models.RecipeInstruction, {foreignKey: 'recipeId', as:'instructions'}),
-    Recipe.hasOne(models.FavoriteRecipe, {foreignKey: 'recipeId', as: 'favoriteRecipes'})
-    Recipe.hasOne(models.RecipeMedia, {foreignKey: 'recipeId', as: 'image'})
-  }
+    Recipe.belongsTo(models.User, { foreignKey: "userId", as: "User" }),
+      Recipe.hasMany(models.RecipeIngredient, {
+        foreignKey: "recipeId",
+        as: "ingredients",
+      }),
+      Recipe.hasMany(models.RecipeInstruction, {
+        foreignKey: "recipeId",
+        as: "instructions",
+      }),
+      Recipe.hasOne(models.FavoriteRecipe, {
+        foreignKey: "recipeId",
+        as: "favoriteRecipes",
+      });
+    Recipe.hasOne(models.RecipeMedia, { foreignKey: "recipeId", as: "image" });
+  };
   return Recipe;
-}
+};
