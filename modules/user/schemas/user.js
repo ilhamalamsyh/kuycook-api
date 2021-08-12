@@ -16,8 +16,8 @@ module.exports = gql`
   }
 
   extend type Mutation {
-    register(input: UserRegisterInput!): UserRegisterResponse
-    login(input: UserLoginInput!): UserLoginResponse
+    register(input: UserRegisterInput!): AuthPayload!
+    login(email: String!, password: String!): AuthPayload!
 
     userUpdate(id: ID!, input: UserUpdate!): User
   }
@@ -29,23 +29,9 @@ module.exports = gql`
     gender: String!
   }
 
-  type UserRegisterResponse {
-    fullname: String!
-    email: String!
-    gender: String!
-  }
-
-  input UserLoginInput {
-    email: String!
-    password: String!
-  }
-
-  type UserLoginResponse {
-    id: Int!
-    fullname: String!
-    email: String!
-    gender: String!
+  type AuthPayload {
     token: String!
+    user: User!
   }
 
   input UserUpdate {
