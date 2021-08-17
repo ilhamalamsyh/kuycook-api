@@ -18,11 +18,13 @@ module.exports = gql`
     recipeCreate(input: RecipeInput!): Recipe
     recipeUpdate(id: ID!, input: RecipeInput!): Recipe
     recipeDelete(id: ID!): Recipe
+    addFavoriteRecipe(id: ID!): Recipe
   }
 
   extend type Query {
     recipeList: [Recipe]
     recipeDetail(id: ID!): Recipe
+    favoriteRecipeList: [Recipe]
   }
 
   type RecipeInstruction {
