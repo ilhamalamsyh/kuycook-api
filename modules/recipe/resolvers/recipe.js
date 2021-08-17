@@ -91,6 +91,47 @@ module.exports = {
         throw new Error(error);
       }
     },
+
+    favoriteRecipeList: async (root, args, { user }) => {
+      try {
+        const userId = user.id;
+        const resep = await Recipe.findAll({
+          where: {
+            deletedAt: {
+              [Op.is]: null,
+            },
+            isFavorite: {
+              [Op.is]: true,
+            },
+          },
+          include: [
+            {
+              model: User,
+              as: "User",
+              where: { id: userId },
+            },
+            {
+              model: RecipeIngredient,
+              as: "ingredients",
+              required: true,
+            },
+            {
+              model: RecipeInstruction,
+              as: "instructions",
+              required: true,
+            },
+            {
+              model: RecipeMedia,
+              as: "image",
+              required: true,
+            },
+          ],
+        });
+        return resep;
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
   },
   Mutation: {
     recipeCreate: async (root, args, { user }) => {
@@ -292,6 +333,49 @@ module.exports = {
         return recipe;
       } catch (err) {
         throw new Error("Failed delete recipe: ", err);
+      }
+    },
+    addFavoriteRecipe: async (_, { id }, { user }) => {
+      const userId = user.id;
+
+      const recipe = await Recipe.findByPk(id, {
+        include: [
+          {
+            model: User,
+            as: "User",
+            where: { id: userId },
+          },
+          {
+            model: RecipeIngredient,
+            as: "ingredients",
+            required: true,
+          },
+          {
+            model: RecipeInstruction,
+            as: "instructions",
+            required: true,
+          },
+          {
+            model: RecipeMedia,
+            as: "image",
+            required: true,
+          },
+        ],
+      });
+
+      if (recipe === null || recipe.deletedAt !== null) {
+        throw new Error("Recipe Not Found");
+      }
+
+      try {
+        if (recipe.isFavorite === false) {
+          recipe.update({ isFavorite: true });
+        } else {
+          recipe.update({ isFavorite: false });
+        }
+        return recipe;
+      } catch (err) {
+        throw new Error(err);
       }
     },
   },
