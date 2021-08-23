@@ -99,7 +99,9 @@ module.exports = {
       }
     },
 
-    favoriteRecipeList: async (root, args, { user }) => {
+    favoriteRecipeList: async (_, { pageSize = 10, page = 0 }, { user }) => {
+      maxPageSizeValidation(pageSize);
+      const offset = setPage(pageSize, page);
       try {
         const userId = user.id;
         const resep = await Recipe.findAll({
@@ -111,6 +113,9 @@ module.exports = {
               [Op.is]: true,
             },
           },
+          limit: pageSize,
+          offset: offset,
+          order: [["created_at", "DESC"]],
           include: [
             {
               model: User,
