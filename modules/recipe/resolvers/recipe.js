@@ -104,7 +104,7 @@ module.exports = {
       const offset = setPage(pageSize, page);
       try {
         const userId = user.id;
-        const resep = await Recipe.findAll({
+        const recipe = await Recipe.findAll({
           where: {
             deletedAt: {
               [Op.is]: null,
@@ -139,7 +139,7 @@ module.exports = {
             },
           ],
         });
-        return resep;
+        return recipe;
       } catch (error) {
         throw new Error(error);
       }
