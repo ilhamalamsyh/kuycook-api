@@ -12,13 +12,17 @@ const {
   AuthenticationError,
   UserInputError,
 } = require("apollo-server-express");
+const {
+  maxPageSizeValidation,
+  setPage,
+} = require("../../../shared/pageSizeValidation");
 
-//TODO: bikin transaction create using "unmanaged transaction" dengan beberapa model yg dibutuhkan
 let t;
-// example in orderCheckout wahyoo project public-api
 module.exports = {
   Query: {
-    recipeList: async (root, args, { user }) => {
+    recipeList: async (_, { pageSize = 10, page }, { user }) => {
+      maxPageSizeValidation(pageSize);
+      const offset = setPage(pageSize, page);
       try {
         const userId = user.id;
         const resep = await Recipe.findAll({
@@ -27,6 +31,9 @@ module.exports = {
               [Op.is]: null,
             },
           },
+          limit: pageSize,
+          offset: offset,
+          order: [["created_at", "DESC"]],
           include: [
             {
               model: User,
