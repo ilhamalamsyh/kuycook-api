@@ -20,7 +20,7 @@ const {
 let t;
 module.exports = {
   Query: {
-    recipeList: async (_, { pageSize = 10, page }, { user }) => {
+    recipeList: async (_, { pageSize = 10, page = 0 }, { user }) => {
       maxPageSizeValidation(pageSize);
       const offset = setPage(pageSize, page);
       try {
@@ -31,9 +31,9 @@ module.exports = {
               [Op.is]: null,
             },
           },
+          order: [["created_at", "DESC"]],
           limit: pageSize,
           offset: offset,
-          order: [["created_at", "DESC"]],
           include: [
             {
               model: User,
