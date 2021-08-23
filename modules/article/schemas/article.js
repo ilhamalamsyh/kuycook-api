@@ -12,7 +12,7 @@ module.exports = gql`
   }
 
   extend type Query {
-    articleList: [Article]
+    articleList(page: Int, pageSize: Int): [Article]
     articleDetail(id: ID!): Article
   }
 
