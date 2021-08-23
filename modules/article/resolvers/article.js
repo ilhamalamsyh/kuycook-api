@@ -5,15 +5,24 @@ const {
 } = require("../../../database/models");
 const { Op } = require("sequelize");
 const recipe = require("../../recipe/resolvers/recipe");
+const {
+  maxPageSizeValidation,
+  setPage,
+} = require("../../../shared/pageSizeValidation");
 
 let t;
 
 module.exports = {
   Query: {
-    articleList: async (root, args, context) => {
+    articleList: async (_, { page = 0, pageSize = 10 }, context) => {
+      maxPageSizeValidation(pageSize);
+      const offset = setPage(page, pageSize);
       try {
         const articles = await Article.findAll({
           where: { deletedAt: { [Op.is]: null } },
+          order: [["created_at", "DESC"]],
+          limit: pageSize,
+          offset: offset,
           include: [{ model: ArticleMedia, as: "image", required: true }],
         });
         return articles;
