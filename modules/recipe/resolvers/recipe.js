@@ -99,10 +99,12 @@ module.exports = {
       }
     },
 
-    favoriteRecipeList: async (root, args, { user }) => {
+    favoriteRecipeList: async (_, { pageSize = 10, page = 0 }, { user }) => {
+      maxPageSizeValidation(pageSize);
+      const offset = setPage(pageSize, page);
       try {
         const userId = user.id;
-        const resep = await Recipe.findAll({
+        const recipe = await Recipe.findAll({
           where: {
             deletedAt: {
               [Op.is]: null,
@@ -111,6 +113,9 @@ module.exports = {
               [Op.is]: true,
             },
           },
+          limit: pageSize,
+          offset: offset,
+          order: [["created_at", "DESC"]],
           include: [
             {
               model: User,
@@ -134,7 +139,7 @@ module.exports = {
             },
           ],
         });
-        return resep;
+        return recipe;
       } catch (error) {
         throw new Error(error);
       }
