@@ -1,9 +1,15 @@
 const { Banner } = require("../../../database/models");
 const { Op } = require("sequelize");
+const {
+  maxPageSizeValidation,
+  setPage,
+} = require("../../../shared/pageSizeValidation");
 
 module.exports = {
   Query: {
-    bannerList: async (root, args, context) => {
+    bannerList: async (_, { page = 0, pageSize = 10 }, context) => {
+      maxPageSizeValidation(pageSize);
+      const offset = setPage(page, pageSize);
       try {
         const banners = await Banner.findAll({
           where: {
@@ -11,6 +17,9 @@ module.exports = {
               [Op.is]: null,
             },
           },
+          order: [["created_at", "DESC"]],
+          limit: pageSize,
+          offset: offset,
         });
         return banners;
       } catch (err) {

@@ -11,7 +11,7 @@ module.exports = gql`
   }
 
   extend type Query {
-    bannerList: [Banner]
+    bannerList(page: Int, pageSize: Int): [Banner]
     bannerDetail(id: ID!): Banner
   }
 
