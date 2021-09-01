@@ -1,10 +1,14 @@
-"use strict";
+/* eslint-disable strict */
+// eslint-disable-next-line lines-around-directive
+// eslint-disable-next-line strict
+// eslint-disable-next-line lines-around-directive
+'use strict';
 
-const Sequelize = require("sequelize");
+const Sequelize = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   const Article = sequelize.define(
-    "Article",
+    'Article',
     {
       id: {
         allowNull: false,
@@ -24,28 +28,28 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: Sequelize.NOW,
-        field: "created_at",
+        field: 'created_at',
       },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: Sequelize.NOW,
-        field: "updated_at",
+        field: 'updated_at',
       },
       deletedAt: {
         allowNull: true,
         type: DataTypes.DATE,
-        field: "deleted_at",
+        field: 'deleted_at',
       },
     },
     {
-      tableName: "articles",
+      tableName: 'articles',
     }
   );
   Article.associate = function (models) {
     Article.hasOne(models.ArticleMedia, {
-      foreignKey: "articleId",
-      as: "image",
+      foreignKey: 'articleId',
+      as: 'image',
     });
   };
   return Article;
