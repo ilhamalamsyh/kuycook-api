@@ -1,29 +1,32 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { UserInputError } = require('apollo-server-errors');
+const { Op } = require('sequelize');
+const { sequelize } = require('../../../database/models');
+const models = require('../../../database/models');
 const {
-  Article,
-  ArticleMedia,
-  sequelize,
-} = require("../../../database/models");
-const { Op } = require("sequelize");
-const recipe = require("../../recipe/resolvers/recipe");
+  articleFormValidate,
+} = require('../../../middleware/fields/articleInputFieldsValidation');
 const {
   maxPageSizeValidation,
   setPage,
-} = require("../../../shared/pageSizeValidation");
+} = require('../../../middleware/pagination/pageSizeValidation');
 
 let t;
 
 module.exports = {
   Query: {
-    articleList: async (_, { page = 0, pageSize = 10 }, context) => {
+    articleList: async (_, { page = 0, pageSize = 10 }) => {
       maxPageSizeValidation(pageSize);
       const offset = setPage(page, pageSize);
       try {
-        const articles = await Article.findAll({
+        const articles = await models.Article.findAll({
           where: { deletedAt: { [Op.is]: null } },
-          order: [["created_at", "DESC"]],
+          order: [['created_at', 'DESC']],
           limit: pageSize,
-          offset: offset,
-          include: [{ model: ArticleMedia, as: "image", required: true }],
+          offset,
+          include: [
+            { model: models.ArticleMedia, as: 'image', required: true },
+          ],
         });
         return articles;
       } catch (err) {
@@ -31,14 +34,16 @@ module.exports = {
       }
     },
 
-    articleDetail: async (_, { id }, context) => {
+    articleDetail: async (_, { id }) => {
       try {
-        const article = await Article.findByPk(id, {
-          include: [{ model: ArticleMedia, as: "image", required: true }],
+        const article = await models.Article.findByPk(id, {
+          include: [
+            { model: models.ArticleMedia, as: 'image', required: true },
+          ],
         });
 
         if (article === null || article.deletedAt !== null) {
-          throw new Error("Article found");
+          throw new Error('Article found');
         }
 
         return article;
@@ -48,19 +53,23 @@ module.exports = {
     },
   },
   Mutation: {
-    articleCreate: async (root, args, context) => {
-      t = await sequelize.transaction();
-      const { title, description, image } = args.input;
+    articleCreate: async (_, { input }) => {
+      const { title, description, image } = input;
+      const { error } = articleFormValidate(input);
+      if (error) {
+        throw new UserInputError(error.details[0].message);
+      }
       let article;
 
       try {
-        article = await Article.create(
+        t = await sequelize.transaction();
+        article = await models.Article.create(
           { title, description },
           { transaction: t }
         );
         const articleId = article.id;
 
-        await ArticleMedia.create(
+        await models.ArticleMedia.create(
           {
             url: image,
             articleId,
@@ -69,57 +78,69 @@ module.exports = {
         );
 
         await t.commit();
-        return await Article.findByPk(articleId, {
-          include: [{ model: ArticleMedia, as: "image", required: true }],
+        return await models.Article.findByPk(articleId, {
+          include: [
+            { model: models.ArticleMedia, as: 'image', required: true },
+          ],
         });
       } catch (err) {
         if (t) {
           await t.rollback();
         }
-        throw new Error("Failed Create Article: ", err);
+        throw new Error('Failed Create Article: ', err);
       }
     },
 
-    articleUpdate: async (_, { id, input }, context) => {
-      t = await sequelize.transaction();
+    articleUpdate: async (_, { id, input }) => {
       const { title, description, image } = input;
+      const { error } = articleFormValidate(input);
+      if (error) {
+        throw new UserInputError(error.details[0].message);
+      }
 
-      const article = await Article.findByPk(id, {
-        include: [{ model: ArticleMedia, as: "image", required: true }],
+      const article = await models.Article.findByPk(id, {
+        include: [{ model: models.ArticleMedia, as: 'image', required: true }],
       });
 
       if (article === null || article.deletedAt !== null) {
-        throw new Error("Article not found");
+        throw new Error('Article not found');
       }
 
       try {
+        t = await sequelize.transaction();
+
         await article.update(
           { title, description },
-          { where: { id: id }, transaction: t }
+          { where: { id }, transaction: t }
         );
 
-        await ArticleMedia.update(
+        await models.ArticleMedia.update(
           { url: image },
           { where: { id: article.image.id }, transaction: t }
         );
 
         await t.commit();
-        return article;
+
+        return await models.Article.findByPk(id, {
+          include: [
+            { model: models.ArticleMedia, as: 'image', required: true },
+          ],
+        });
       } catch (err) {
         if (t) {
           await t.rollback();
         }
-        throw new Error("Failed Update Article", err);
+        throw new Error('Failed Update Article', err);
       }
     },
 
-    articleDelete: async (root, { id }, context) => {
-      const article = await Article.findByPk(id, {
-        include: [{ model: ArticleMedia, as: "image", required: true }],
+    articleDelete: async (_, { id }) => {
+      const article = await models.Article.findByPk(id, {
+        include: [{ model: models.ArticleMedia, as: 'image', required: true }],
       });
 
       if (article === null || article.deletedAt !== null) {
-        throw new Error("Error: Article Not Found");
+        throw new Error('Error: Article Not Found');
       }
 
       try {
@@ -129,7 +150,7 @@ module.exports = {
         );
         return article;
       } catch (err) {
-        throw new Error("Failed Delete Article");
+        throw new Error('Failed Delete Article');
       }
     },
   },
