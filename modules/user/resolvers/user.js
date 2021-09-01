@@ -1,28 +1,33 @@
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const models = require("../../../database/models");
-const { AuthenticationError } = require("apollo-server-express");
-const { ApolloError } = require("apollo-server-errors");
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { AuthenticationError } = require('apollo-server-express');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { ApolloError, UserInputError } = require('apollo-server-errors');
+const models = require('../../../database/models');
 const {
   validateRegister,
   validateLogin,
-} = require("../../../shared/authValidation");
+  validateEmail,
+  validateExistUser,
+} = require('../../../middleware/auth/authValidation');
+const {
+  userFormValidation,
+} = require('../../../middleware/fields/userInputFieldsValidation');
 
 module.exports = {
   Mutation: {
-    register: async (root, args, context) => {
+    register: async (_, args) => {
+      const { fullname, email, password, gender } = args.input;
+      const { error } = validateRegister(args.input);
+
+      if (error) {
+        throw new UserInputError(error.details[0].message);
+      }
+
+      const userEmail = await models.User.findOne({ where: { email } });
+      await validateEmail(userEmail);
+
       try {
-        const { fullname, email, password, gender } = args.input;
-
-        const { error } = validateRegister(args.input);
-        if (error) {
-          throw new Error(error.details[0].message);
-        }
-
-        const validateEmail = await models.User.findOne({ where: { email } });
-        if (validateEmail) {
-          throw new Error("Email has been used!");
-        }
         const user = await models.User.create({
           fullname,
           email,
@@ -38,28 +43,22 @@ module.exports = {
           }
         );
 
-        return { token, user, message: "Authentication Successful!" };
+        return { token, user, message: 'Authentication Successful!' };
       } catch (err) {
         throw new AuthenticationError(err.message);
       }
     },
 
-    login: async (_, { email, password }, context) => {
+    login: async (_, { email, password }) => {
+      const { error } = await validateLogin(email, password);
+      if (error) {
+        throw new UserInputError(error.details[0].message);
+      }
+
+      const user = await models.User.findOne({ where: { email } });
+      await validateExistUser(user, password);
+
       try {
-        const { error } = await validateLogin(email, password);
-        if (error) {
-          throw new Error(error.details[0].message);
-        }
-
-        const user = await models.User.findOne({ where: { email } });
-        if (!user) {
-          throw new AuthenticationError("No User with that email");
-        }
-        const isValid = await bcrypt.compare(password, user.password);
-        if (!isValid) {
-          throw new AuthenticationError("Invalid Password");
-        }
-
         const token = jwt.sign(
           { id: user.id, email: user.email },
           process.env.JWT_SECRET,
@@ -68,20 +67,25 @@ module.exports = {
           }
         );
         return { token, user };
-      } catch (error) {
-        throw new AuthenticationError(error.message);
+      } catch (err) {
+        throw new AuthenticationError(err.message);
       }
     },
 
-    userUpdate: async (parent, { id, input }, context) => {
-      //TODO:Add validation of updateUser
-      try {
-        const { fullname, email, password, gender } = input;
-        const user = await models.User.findByPk(id);
-        if (!user) {
-          throw new ApolloError("User not found");
-        }
+    userUpdate: async (_, { id, input }) => {
+      const { fullname, email, password, gender } = input;
 
+      const { error } = userFormValidation(input);
+      if (error) {
+        throw new UserInputError(error.details[0].message);
+      }
+
+      const user = await models.User.findByPk(id);
+      if (!user) {
+        throw new ApolloError('User not found');
+      }
+
+      try {
         const userUpdated = await user.update({
           fullname,
           email,
@@ -89,29 +93,9 @@ module.exports = {
           gender,
         });
         return userUpdated;
-      } catch (error) {
-        throw new Error(`Failed update user: ${error.message}`);
+      } catch (err) {
+        throw new Error(`Failed update user: ${err.message}`);
       }
     },
   },
 };
-
-// updateUser: async (root, { id, input }, context) => {
-//     const { fullname, password, email, gender } = input;
-//     console.log(id);
-//     try {
-//         // if (!user) {
-//         //     throw new AuthenticationError('You must login to update a user');
-//         // }
-//         return await User && User.update({
-//             fullname,
-//             email,
-//             password,
-//             gender
-//         }, {where: {id: id}});
-//         console.log(`UserUpdate: ${user}`);
-
-//     } catch (error) {
-//         throw new Error(`something went wrong: ${error}`)
-//     }
-// }
