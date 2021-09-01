@@ -1,21 +1,15 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { UserInputError } = require('apollo-server-errors');
+const { Op } = require('sequelize');
+const { sequelize } = require('../../../database/models');
+const models = require('../../../database/models');
 const {
-  User,
-  Recipe,
-  RecipeIngredient,
-  RecipeInstruction,
-  RecipeMedia,
-  sequelize,
-} = require("../../../database/models");
-
-const { Op } = require("sequelize");
-const {
-  AuthenticationError,
-  UserInputError,
-} = require("apollo-server-express");
+  recipeFormValidation,
+} = require('../../../middleware/fields/recipeInputFieldsValidation');
 const {
   maxPageSizeValidation,
   setPage,
-} = require("../../../shared/pageSizeValidation");
+} = require('../../../middleware/pagination/pageSizeValidation');
 
 let t;
 module.exports = {
@@ -23,77 +17,78 @@ module.exports = {
     recipeList: async (_, { pageSize = 10, page = 0 }, { user }) => {
       maxPageSizeValidation(pageSize);
       const offset = setPage(pageSize, page);
+
+      const userId = user.id;
+
       try {
-        const userId = user.id;
-        const resep = await Recipe.findAll({
+        return await models.Recipe.findAll({
           where: {
             deletedAt: {
               [Op.is]: null,
             },
           },
-          order: [["created_at", "DESC"]],
+          order: [['created_at', 'DESC']],
           limit: pageSize,
-          offset: offset,
+          offset,
           include: [
             {
-              model: User,
-              as: "User",
+              model: models.User,
+              as: 'User',
               where: { id: userId },
             },
             {
-              model: RecipeIngredient,
-              as: "ingredients",
+              model: models.RecipeIngredient,
+              as: 'ingredients',
               required: true,
             },
             {
-              model: RecipeInstruction,
-              as: "instructions",
+              model: models.RecipeInstruction,
+              as: 'instructions',
               required: true,
             },
             {
-              model: RecipeMedia,
-              as: "image",
+              model: models.RecipeMedia,
+              as: 'image',
               required: true,
             },
           ],
         });
-        return resep;
-      } catch (error) {
-        throw new Error(error);
+      } catch (err) {
+        throw new Error(err);
       }
     },
 
     recipeDetail: async (_, { id }, { user }) => {
       try {
-        userId = user.id;
-        const resepDetail = await Recipe.findByPk(id, {
+        const userId = user.id;
+        const recipe = await models.Recipe.findByPk(id, {
           include: [
             {
-              model: User,
-              as: "User",
+              model: models.User,
+              as: 'User',
               where: { id: userId },
             },
             {
-              model: RecipeIngredient,
-              as: "ingredients",
+              model: models.RecipeIngredient,
+              as: 'ingredients',
               required: true,
             },
             {
-              model: RecipeInstruction,
-              as: "instructions",
+              model: models.RecipeInstruction,
+              as: 'instructions',
               required: true,
             },
             {
-              model: RecipeMedia,
-              as: "image",
+              model: models.RecipeMedia,
+              as: 'image',
               required: true,
             },
           ],
         });
-        if (resepDetail === null || resepDetail.deletedAt !== null) {
-          throw new Error("Recipe not found");
+        if (recipe === null || recipe.deletedAt !== null) {
+          throw new Error('Recipe not found');
         }
-        return resepDetail;
+        return recipe;
       } catch (error) {
         throw new Error(error);
       }
@@ -102,9 +97,10 @@ module.exports = {
     favoriteRecipeList: async (_, { pageSize = 10, page = 0 }, { user }) => {
       maxPageSizeValidation(pageSize);
       const offset = setPage(pageSize, page);
+
+      const userId = user.id;
       try {
-        const userId = user.id;
-        const recipe = await Recipe.findAll({
+        const recipes = await models.Recipe.findAll({
           where: {
             deletedAt: {
               [Op.is]: null,
@@ -114,47 +110,51 @@ module.exports = {
             },
           },
           limit: pageSize,
-          offset: offset,
-          order: [["created_at", "DESC"]],
+          offset,
+          order: [['created_at', 'DESC']],
           include: [
             {
-              model: User,
-              as: "User",
+              model: models.User,
+              as: 'User',
               where: { id: userId },
             },
             {
-              model: RecipeIngredient,
-              as: "ingredients",
+              model: models.RecipeIngredient,
+              as: 'ingredients',
               required: true,
             },
             {
-              model: RecipeInstruction,
-              as: "instructions",
+              model: models.RecipeInstruction,
+              as: 'instructions',
               required: true,
             },
             {
-              model: RecipeMedia,
-              as: "image",
+              model: models.RecipeMedia,
+              as: 'image',
               required: true,
             },
           ],
         });
-        return recipe;
+        return recipes;
       } catch (error) {
         throw new Error(error);
       }
     },
   },
   Mutation: {
-    recipeCreate: async (root, args, { user }) => {
-      t = await sequelize.transaction();
+    recipeCreate: async (_, { input }, { user }) => {
+      let recipe = {};
       const userId = user.id;
-      let { title, description, ingredients, instructions, image } = args.input;
-      let recipe = null;
+      const { title, description, ingredients, instructions, image } = input;
+      const { error } = await recipeFormValidation(input);
+      if (error) {
+        throw new UserInputError(error.details[0].message);
+      }
 
       try {
+        t = await sequelize.transaction();
         // create recipe
-        recipe = await Recipe.create(
+        recipe = await models.Recipe.create(
           {
             title,
             description,
@@ -165,25 +165,27 @@ module.exports = {
         const recipeId = recipe.id;
 
         // create ingredients
-        const modifyIngredients = ingredients.map(ingredient => {
-          return { ingredient, recipeId };
-        });
-        await RecipeIngredient.bulkCreate(modifyIngredients, {
+        const modifyIngredients = ingredients.map((ingredient) => ({
+          ingredient,
+          recipeId,
+        }));
+        await models.RecipeIngredient.bulkCreate(modifyIngredients, {
           transaction: t,
           returning: true,
         });
 
         // create instructions
-        const modifyInstructions = instructions.map(instruction => {
-          return { instruction, recipeId };
-        });
-        await RecipeInstruction.bulkCreate(modifyInstructions, {
+        const modifyInstructions = instructions.map((instruction) => ({
+          instruction,
+          recipeId,
+        }));
+        await models.RecipeInstruction.bulkCreate(modifyInstructions, {
           transaction: t,
           returning: true,
         });
 
         // create recipe image
-        await RecipeMedia.create(
+        await models.RecipeMedia.create(
           {
             url: image,
             recipeId,
@@ -193,26 +195,26 @@ module.exports = {
 
         await t.commit();
 
-        return await Recipe.findByPk(recipeId, {
+        return await models.Recipe.findByPk(recipeId, {
           include: [
             {
-              model: User,
-              as: "User",
+              model: models.User,
+              as: 'User',
               where: { id: userId },
             },
             {
-              model: RecipeIngredient,
-              as: "ingredients",
+              model: models.RecipeIngredient,
+              as: 'ingredients',
               required: true,
             },
             {
-              model: RecipeInstruction,
-              as: "instructions",
+              model: models.RecipeInstruction,
+              as: 'instructions',
               require: true,
             },
             {
-              model: RecipeMedia,
-              as: "image",
+              model: models.RecipeMedia,
+              as: 'image',
               require: true,
             },
           ],
@@ -221,120 +223,155 @@ module.exports = {
         if (t) {
           await t.rollback();
         }
-        throw new Error("Failed Create Recipe: ", err);
+        throw new Error('Failed Create Recipe: ', err);
       }
     },
-    recipeUpdate: async (root, { id, input }, { user }) => {
-      t = await sequelize.transaction();
-      const userId = user.id;
 
+    recipeUpdate: async (_, { id, input }, { user }) => {
+      const userId = user.id;
       const { title, description, ingredients, instructions, image } = input;
-      const recipe = await Recipe.findByPk(id, {
+      const { error } = await recipeFormValidation(input);
+      if (error) {
+        throw new UserInputError(error.details[0].message);
+      }
+
+      const recipe = await models.Recipe.findByPk(id, {
         include: [
           {
-            model: User,
-            as: "User",
+            model: models.User,
+            as: 'User',
             where: { id: userId },
           },
           {
-            model: RecipeIngredient,
-            as: "ingredients",
+            model: models.RecipeIngredient,
+            as: 'ingredients',
             required: true,
           },
           {
-            model: RecipeInstruction,
-            as: "instructions",
+            model: models.RecipeInstruction,
+            as: 'instructions',
             required: true,
           },
           {
-            model: RecipeMedia,
-            as: "image",
+            model: models.RecipeMedia,
+            as: 'image',
             required: true,
           },
         ],
       });
 
-      if (!recipe || recipe.deletedAt !== null) {
-        throw new Error("Recipe not found");
+      if (recipe == null || recipe.deletedAt !== null) {
+        throw new Error('Recipe not found');
       }
 
-      const modifyIngredients = ingredients.map(ingredient => {
-        return { ingredient, id };
-      });
-
-      const modifyInstructions = instructions.map(instruction => {
-        return { instruction, id };
-      });
+      const recipeId = recipe.id;
+      const modifyIngredients = ingredients.map((ingredient) => ({
+        ingredient,
+        recipeId,
+      }));
+      const modifyInstructions = instructions.map((instruction) => ({
+        instruction,
+        recipeId,
+      }));
 
       try {
+        t = await sequelize.transaction();
         /// update recipe
         await recipe.update(
           { title, description, userId },
           {
             where: {
-              id: id,
+              id,
             },
             transaction: t,
           }
         );
-        /// update ingredients
-        await RecipeIngredient.bulkCreate(modifyIngredients, {
-          updateOnDuplicate: ["ingredient"],
+
+        // create ingredients
+
+        await models.RecipeIngredient.bulkCreate(modifyIngredients, {
           transaction: t,
+          updateOnDuplicate: ['ingredient'],
         });
+
         /// update intructions
-        await RecipeInstruction.bulkCreate(modifyInstructions, {
-          updateOnDuplicate: ["instruction"],
-          ignoreDuplicates: true,
+        await models.RecipeInstruction.bulkCreate(modifyInstructions, {
+          updateOnDuplicate: ['instruction'],
           transaction: t,
         });
+
         /// update image
-        await RecipeMedia.update(
+        await models.RecipeMedia.update(
           {
             url: image,
           },
           { where: { id: recipe.image.id }, transaction: t }
         );
+
         await t.commit();
 
-        return recipe;
+        return await models.Recipe.findByPk(id, {
+          include: [
+            {
+              model: models.User,
+              as: 'User',
+              where: { id: userId },
+            },
+            {
+              model: models.RecipeIngredient,
+              as: 'ingredients',
+              required: true,
+            },
+            {
+              model: models.RecipeInstruction,
+              as: 'instructions',
+              required: true,
+            },
+            {
+              model: models.RecipeMedia,
+              as: 'image',
+              required: true,
+            },
+          ],
+        });
       } catch (err) {
         if (t) {
           await t.rollback();
         }
-        throw new Error("failed to updated recipe: ", err);
+        throw new Error(err);
       }
     },
-    recipeDelete: async (root, { id }, { user }) => {
+
+    recipeDelete: async (_, { id }, { user }) => {
       const userId = user.id;
 
-      const recipe = await Recipe.findByPk(id, {
+      const recipe = await models.Recipe.findByPk(id, {
         include: [
           {
-            model: User,
-            as: "User",
+            model: models.User,
+            as: 'User',
             where: { id: userId },
           },
           {
-            model: RecipeIngredient,
-            as: "ingredients",
+            model: models.RecipeIngredient,
+            as: 'ingredients',
             required: true,
           },
           {
-            model: RecipeInstruction,
-            as: "instructions",
+            model: models.RecipeInstruction,
+            as: 'instructions',
             required: true,
           },
           {
-            model: RecipeMedia,
-            as: "image",
+            model: models.RecipeMedia,
+            as: 'image',
             required: true,
           },
         ],
       });
 
       if (recipe === null || recipe.deletedAt !== null) {
-        throw new Error("Recipe Not Found");
+        throw new Error('Recipe Not Found');
       }
 
       try {
@@ -344,39 +381,39 @@ module.exports = {
         );
         return recipe;
       } catch (err) {
-        throw new Error("Failed delete recipe: ", err);
+        throw new Error('Failed delete recipe: ', err);
       }
     },
     addFavoriteRecipe: async (_, { id }, { user }) => {
       const userId = user.id;
 
-      const recipe = await Recipe.findByPk(id, {
+      const recipe = await models.Recipe.findByPk(id, {
         include: [
           {
-            model: User,
-            as: "User",
+            model: models.User,
+            as: 'User',
             where: { id: userId },
           },
           {
-            model: RecipeIngredient,
-            as: "ingredients",
+            model: models.RecipeIngredient,
+            as: 'ingredients',
             required: true,
           },
           {
-            model: RecipeInstruction,
-            as: "instructions",
+            model: models.RecipeInstruction,
+            as: 'instructions',
             required: true,
           },
           {
-            model: RecipeMedia,
-            as: "image",
+            model: models.RecipeMedia,
+            as: 'image',
             required: true,
           },
         ],
       });
 
       if (recipe === null || recipe.deletedAt !== null) {
-        throw new Error("Recipe Not Found");
+        throw new Error('Recipe Not Found');
       }
 
       try {
