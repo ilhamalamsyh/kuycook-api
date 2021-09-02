@@ -1,3 +1,5 @@
+/* eslint-disable lines-around-directive */
+// eslint-disable-next-line strict
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -6,42 +8,42 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER.UNSIGNED
+        type: Sequelize.INTEGER.UNSIGNED,
       },
       fullname: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull: false,
       },
       gender: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull: false,
       },
       password: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull: false,
       },
       email: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        field: 'created_at'
+        field: 'created_at',
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        field: 'updated_at'
+        field: 'updated_at',
       },
       deletedAt: {
-        allowNull:true,
+        allowNull: true,
         type: Sequelize.DATE,
-        field: 'deleted_at'
-      }
+        field: 'deleted_at',
+      },
     });
   },
-  down: async (queryInterface, Sequelize) => {
+  down: async (queryInterface) => {
     await queryInterface.dropTable('users');
-  }
+  },
 };

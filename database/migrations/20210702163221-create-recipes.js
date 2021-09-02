@@ -1,3 +1,5 @@
+/* eslint-disable lines-around-directive */
+// eslint-disable-next-line strict
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -6,7 +8,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER.UNSIGNED
+        type: Sequelize.INTEGER.UNSIGNED,
       },
       title: {
         type: Sequelize.STRING,
@@ -23,31 +25,31 @@ module.exports = {
       userId: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
-        references:{
-          model:{
-            tableName: 'users'
+        references: {
+          model: {
+            tableName: 'users',
           },
-          key: 'id'
+          key: 'id',
         },
       },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        field: 'created_at'
+        field: 'created_at',
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        field: 'updated_at'
+        field: 'updated_at',
       },
       deletedAt: {
-        allowNull:true,
+        allowNull: true,
         type: Sequelize.DATE,
-        field: 'deleted_at'
-      }
+        field: 'deleted_at',
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('recipes');
-  }
+  },
 };

@@ -1,25 +1,30 @@
-const { Banner } = require("../../../database/models");
-const { Op } = require("sequelize");
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { UserInputError } = require('apollo-server-errors');
+const { Op } = require('sequelize');
+const models = require('../../../database/models');
+const {
+  bannerFormValidate,
+} = require('../../../middleware/fields/bannerInputFieldsValidation');
 const {
   maxPageSizeValidation,
   setPage,
-} = require("../../../shared/pageSizeValidation");
+} = require('../../../middleware/pagination/pageSizeValidation');
 
 module.exports = {
   Query: {
-    bannerList: async (_, { page = 0, pageSize = 10 }, context) => {
+    bannerList: async (_, { page = 0, pageSize = 10 }) => {
       maxPageSizeValidation(pageSize);
       const offset = setPage(page, pageSize);
       try {
-        const banners = await Banner.findAll({
+        const banners = await models.Banner.findAll({
           where: {
             deletedAt: {
               [Op.is]: null,
             },
           },
-          order: [["created_at", "DESC"]],
+          order: [['created_at', 'DESC']],
           limit: pageSize,
-          offset: offset,
+          offset,
         });
         return banners;
       } catch (err) {
@@ -27,12 +32,12 @@ module.exports = {
       }
     },
 
-    bannerDetail: async (_, { id }, context) => {
+    bannerDetail: async (_, { id }) => {
       try {
-        const banner = await Banner.findByPk(id);
+        const banner = await models.Banner.findByPk(id);
 
         if (banner === null || banner.deletedAt !== null) {
-          throw new Error("Banner not found");
+          throw new Error('Banner not found');
         }
         return banner;
       } catch (err) {
@@ -42,48 +47,57 @@ module.exports = {
   },
 
   Mutation: {
-    bannerCreate: async (root, args, context) => {
-      const { title, image } = args.input;
+    bannerCreate: async (_, { input }) => {
+      const { title, image } = input;
+      const { error } = bannerFormValidate(input);
+      if (error) {
+        throw new UserInputError(error.details[0].message);
+      }
 
       try {
-        const banner = await Banner.create({ title, image });
+        const banner = await models.Banner.create({ title, image });
 
         const bannerId = banner.id;
 
-        return await Banner.findByPk(bannerId);
+        return await models.Banner.findByPk(bannerId);
       } catch (err) {
-        throw new Error("Failed Create Banner", err);
+        throw new Error('Failed Create Banner', err);
       }
     },
 
-    bannerUpdate: async (root, { id, input }, context) => {
+    bannerUpdate: async (_, { id, input }) => {
       const { title, image } = input;
-      const banner = await Banner.findByPk(id);
+      const { error } = bannerFormValidate(input);
+      if (error) {
+        throw new UserInputError(error.details[0].message);
+      }
+
+      const banner = await models.Banner.findByPk(id);
 
       if (banner === null || banner.deletedAt !== null) {
-        throw new Error("Banner not found");
+        throw new Error('Banner not found');
       }
 
       try {
-        await banner.update({ title, image }, { where: { id: id } });
+        await banner.update({ title, image }, { where: { id } });
         return banner;
       } catch (err) {
-        throw new Error("Failed Update Article: ", err);
+        throw new Error('Failed Update Article: ', err);
       }
     },
 
-    bannerDelete: async (root, { id }, context) => {
-      const banner = await Banner.findByPk(id);
+    bannerDelete: async (_, { id }) => {
+      const banner = await models.Banner.findByPk(id);
 
       if (banner === null || banner.deletedAt !== null) {
-        throw new Error("Banner not found");
+        throw new Error('Banner not found');
       }
 
       try {
-        await banner.update({ deletedAt: Date.now() }, { where: { id: id } });
+        await banner.update({ deletedAt: Date.now() }, { where: { id } });
         return banner;
       } catch (err) {
-        throw new Error("Failed Delete Banner", err);
+        throw new Error('Failed Delete Banner', err);
       }
     },
   },

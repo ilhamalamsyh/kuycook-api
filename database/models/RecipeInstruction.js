@@ -1,10 +1,12 @@
-"use strict";
+/* eslint-disable lines-around-directive */
+// eslint-disable-next-line strict
+'use strict';
 
-const Sequelize = require("sequelize");
+const Sequelize = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   const RecipeInstruction = sequelize.define(
-    "RecipeInstruction",
+    'RecipeInstruction',
     {
       id: {
         allowNull: false,
@@ -24,28 +26,28 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: Sequelize.NOW,
-        field: "created_at",
+        field: 'created_at',
       },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: Sequelize.NOW,
-        field: "updated_at",
+        field: 'updated_at',
       },
       deletedAt: {
         allowNull: true,
         type: DataTypes.DATE,
-        field: "deleted_at",
+        field: 'deleted_at',
       },
     },
     {
-      tableName: "recipe_instructions",
+      tableName: 'recipe_instructions',
     }
   );
   RecipeInstruction.association = function (models) {
     RecipeInstruction.belongsTo(models.Recipe, {
-      foreignKey: "recipeId",
-      as: "recipe",
+      foreignKey: 'recipeId',
+      as: 'recipe',
     });
   };
   return RecipeInstruction;

@@ -1,4 +1,4 @@
-const { gql } = require("apollo-server-express");
+const { gql } = require('apollo-server-express');
 
 module.exports = gql`
   type Recipe {
@@ -15,7 +15,7 @@ module.exports = gql`
   }
 
   extend type Mutation {
-    recipeCreate(input: RecipeInput!): Recipe
+    recipeCreate(input: RecipeInput!): Recipe!
     recipeUpdate(id: ID!, input: RecipeInput!): Recipe
     recipeDelete(id: ID!): Recipe
     addFavoriteRecipe(id: ID!): Recipe
