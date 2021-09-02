@@ -43,7 +43,7 @@ module.exports = {
         });
 
         if (article === null || article.deletedAt !== null) {
-          throw new Error('Article found');
+          throw new Error('Article not found');
         }
 
         return article;
