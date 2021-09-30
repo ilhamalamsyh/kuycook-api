@@ -1,10 +1,15 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable no-plusplus */
+/* eslint-disable prefer-const */
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { UserInputError } = require('apollo-server-errors');
+// const { date, array } = require('joi');
 const { Op } = require('sequelize');
 const { sequelize } = require('../../../database/models');
 const models = require('../../../database/models');
 const {
   recipeFormValidation,
+  recipeUpdateFormValidation,
 } = require('../../../middleware/fields/recipeInputFieldsValidation');
 const {
   maxPageSizeValidation,
@@ -85,6 +90,7 @@ module.exports = {
             },
           ],
         });
+
         if (recipe === null || recipe.deletedAt !== null) {
           throw new Error('Recipe not found');
         }
@@ -230,28 +236,13 @@ module.exports = {
     recipeUpdate: async (_, { id, input }, { user }) => {
       const userId = user.id;
       const { title, description, ingredients, instructions, image } = input;
-      const { error } = await recipeFormValidation(input);
+      const { error } = await recipeUpdateFormValidation(input);
       if (error) {
         throw new UserInputError(error.details[0].message);
       }
 
       const recipe = await models.Recipe.findByPk(id, {
         include: [
-          {
-            model: models.User,
-            as: 'User',
-            where: { id: userId },
-          },
-          {
-            model: models.RecipeIngredient,
-            as: 'ingredients',
-            required: true,
-          },
-          {
-            model: models.RecipeInstruction,
-            as: 'instructions',
-            required: true,
-          },
           {
             model: models.RecipeMedia,
             as: 'image',
@@ -262,20 +253,52 @@ module.exports = {
 
       if (recipe == null || recipe.deletedAt !== null) {
         throw new Error('Recipe not found');
+      } else if (recipe.userId != userId) {
+        throw new Error('Recipe not found for this user id.');
       }
 
       const recipeId = recipe.id;
-      const modifyIngredients = ingredients.map((ingredient) => ({
-        ingredient,
-        recipeId,
-      }));
-      const modifyInstructions = instructions.map((instruction) => ({
-        instruction,
-        recipeId,
-      }));
+
+      const recipeIngredients = await models.RecipeIngredient.findAll({
+        where: { recipeId },
+        attributes: ['id', 'recipeId'],
+      });
+
+      const recipeInstruction = await models.RecipeInstruction.findAll({
+        where: { recipeId },
+        attributes: ['id', 'recipeId'],
+      });
+
+      let recipeIngredientExistingIds = [];
+      let recipeInstructionExistingIds = [];
+
+      for (let i = 0; i < recipeIngredients.length; i++) {
+        const recipeIngredientId = recipeIngredients[i].id;
+        ingredients.forEach((ingredient) => {
+          const recipeIngredientRecipeId = parseInt(ingredient.recipeId, 10);
+          if (recipeIngredientRecipeId !== recipeId) {
+            throw new Error('Recipe id of recipe ingredient id not found.');
+          }
+          // TODO (Ilham): validate recipe ingredient id not found
+        });
+        recipeIngredientExistingIds.push(recipeIngredientId);
+      }
+
+      for (let i = 0; i < recipeInstruction.length; i++) {
+        const recipeInstructionId = recipeInstruction[i].id;
+        instructions.forEach((instruction) => {
+          const recipeInstructionRecipeId = parseInt(instruction.recipeId, 10);
+          if (recipeInstructionRecipeId !== recipeId) {
+            throw new Error('Recipe id of recipe instruction id not found.');
+          }
+          // TODO (Ilham): validate recipe instruction id not found
+        });
+        recipeInstructionExistingIds.push(recipeInstructionId);
+      }
 
       try {
         t = await sequelize.transaction();
+
         /// update recipe
         await recipe.update(
           { title, description, userId },
@@ -287,17 +310,65 @@ module.exports = {
           }
         );
 
-        // create ingredients
+        // update or create new recipe ingredients
+        await ingredients.forEach(async (ingredient) => {
+          let modifyIngredients;
+          let recipeIngredientId = parseInt(ingredient.id, 10);
 
-        await models.RecipeIngredient.bulkCreate(modifyIngredients, {
-          transaction: t,
-          updateOnDuplicate: ['ingredient'],
+          if (ingredient.id == '' || ingredient.id === null) {
+            modifyIngredients = await models.RecipeIngredient.create(
+              {
+                ingredient: ingredient.ingredient,
+                recipeId: ingredient.recipeId,
+              },
+              { transaction: t }
+            );
+          }
+
+          if (recipeIngredientExistingIds.includes(recipeIngredientId)) {
+            modifyIngredients = await models.RecipeIngredient.update(
+              {
+                ingredient: ingredient.ingredient,
+                recipeId: ingredient.recipeId,
+              },
+              { where: { id: ingredient.id }, transaction: t }
+            );
+          } else {
+            throw new Error('Recipe IngredientId not found.');
+          }
+
+          return modifyIngredients;
         });
 
-        /// update intructions
-        await models.RecipeInstruction.bulkCreate(modifyInstructions, {
-          updateOnDuplicate: ['instruction'],
-          transaction: t,
+        // Update or Create recipe instructions
+        await instructions.forEach(async (instruction) => {
+          let modifyInstructions;
+          let recipeInstructionId = parseInt(instruction.id, 10);
+
+          if (instruction.id == '' || instruction.id === null) {
+            modifyInstructions = await models.RecipeInstruction.create(
+              {
+                instruction: instruction.instruction,
+                recipeId: instruction.recipeId,
+              },
+              { transaction: t }
+            );
+          }
+          if (recipeInstructionExistingIds.includes(recipeInstructionId)) {
+            modifyInstructions = await models.RecipeInstruction.update(
+              {
+                instruction: instruction.instruction,
+                recipeId: instruction.recipeId,
+              },
+              {
+                where: { id: instruction.id },
+                transaction: t,
+              }
+            );
+          } else {
+            throw new Error('Recipe InstructionID not found.');
+          }
+          return modifyInstructions;
         });
 
         /// update image
@@ -309,8 +380,7 @@ module.exports = {
         );
 
         await t.commit();
-
-        return await models.Recipe.findByPk(id, {
+        const recipeUpdate = await models.Recipe.findByPk(id, {
           include: [
             {
               model: models.User,
@@ -334,6 +404,8 @@ module.exports = {
             },
           ],
         });
+
+        return recipeUpdate;
       } catch (err) {
         if (t) {
           await t.rollback();
