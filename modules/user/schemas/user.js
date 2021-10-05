@@ -22,6 +22,10 @@ module.exports = gql`
     userUpdate(id: ID!, input: UserUpdate!): User
   }
 
+  extend type Query {
+    currentUser: User
+  }
+
   input UserRegisterInput {
     fullname: String!
     email: String!
