@@ -24,14 +24,19 @@ module.exports = {
         throw new UserInputError(error.details[0].message);
       }
 
-      const userEmail = await models.User.findOne({ where: { email } });
-      await validateEmail(userEmail);
-
       try {
+        const userEmail = await models.User.findOne({
+          where: { email },
+          attributes: ['email'],
+        });
+        await validateEmail(userEmail);
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
         const user = await models.User.create({
           fullname,
           email,
-          password: await bcrypt.hash(password, 10),
+          password: hashedPassword,
           gender,
         });
 
@@ -43,7 +48,10 @@ module.exports = {
           }
         );
 
-        return { token, user, message: 'Authentication Successful!' };
+        return {
+          token,
+          user,
+        };
       } catch (err) {
         throw new AuthenticationError(err.message);
       }
