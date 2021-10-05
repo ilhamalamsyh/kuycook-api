@@ -15,6 +15,15 @@ const {
 } = require('../../../middleware/fields/userInputFieldsValidation');
 
 module.exports = {
+  Query: {
+    currentUser: async (_, args, { user }) => {
+      if (!user) {
+        throw new Error('You are not authenticated');
+      }
+      const me = models.User.findByPk(user.id);
+      return me;
+    },
+  },
   Mutation: {
     register: async (_, args) => {
       const { fullname, email, password, gender } = args.input;
