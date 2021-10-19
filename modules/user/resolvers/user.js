@@ -1,8 +1,11 @@
+/* eslint-disable no-self-compare */
+/* eslint-disable prefer-const */
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { AuthenticationError } = require('apollo-server-express');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { ApolloError, UserInputError } = require('apollo-server-errors');
+const crypto = require('crypto');
 const models = require('../../../database/models');
 const {
   validateRegister,
@@ -13,6 +16,10 @@ const {
 const {
   userFormValidation,
 } = require('../../../middleware/fields/userInputFieldsValidation');
+const sendEmail = require('../../../utils/sendEmail');
+const {
+  resetPasswordValidate,
+} = require('../../../middleware/fields/resetPasswordInputField');
 
 module.exports = {
   Query: {
@@ -112,6 +119,75 @@ module.exports = {
         return userUpdated;
       } catch (err) {
         throw new Error(`Failed update user: ${err.message}`);
+      }
+    },
+
+    regeneratePasswordResetLink: async (_, { email }) => {
+      try {
+        const user = await models.User.findOne({ where: { email } });
+        if (!user) {
+          throw new Error("user with given email doesn't exist");
+        }
+
+        let token = await models.Token.findOne({ userId: user.id });
+        if (!token) {
+          token = await models.Token.create({
+            userId: user.id,
+            token: crypto.randomBytes(32).toString('hex'),
+          });
+        }
+
+        const link = `${process.env.BASE_URL}/password-reset/${user.id}/${token.token}`;
+
+        await sendEmail(user.email, 'Password Reset', link);
+        return 'Email was sent';
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+
+    passwordReset: async (_, { input }) => {
+      const { link, password } = input;
+      const url = 'http://localhost:8080/api/v1/password-reset/';
+
+      // Joi Validation
+      const { error } = await resetPasswordValidate(input);
+      if (error) {
+        throw new UserInputError(error.details[0].message);
+      }
+
+      const splitLink = link.split('/');
+      const userToken = splitLink[7];
+      const id = parseInt(splitLink[6], 10);
+
+      try {
+        const user = await models.User.findByPk(id);
+        if (!user) {
+          throw new Error('User not found');
+        }
+        const token = await models.Token.findOne({
+          userId: user.id,
+          token: userToken,
+        });
+
+        // concate user static link, user, token
+        const userId = token.userId.toString();
+        const urlToken = `/${token.token}`;
+        const concateUrlUserIdToken = url.concat(userId + urlToken);
+
+        if (concateUrlUserIdToken !== link) {
+          throw new Error('Invalid link or expired.');
+        }
+
+        await user.update({
+          password: await bcrypt.hash(password, 10),
+        });
+
+        await token.destroy();
+
+        return 'Password reset successfully.';
+      } catch (err) {
+        throw new Error(err);
       }
     },
   },

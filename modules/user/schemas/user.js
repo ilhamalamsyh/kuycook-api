@@ -20,10 +20,17 @@ module.exports = gql`
     login(email: String!, password: String!): AuthPayload!
 
     userUpdate(id: ID!, input: UserUpdate!): User
+    regeneratePasswordResetLink(email: String!): String!
+    passwordReset(input: ResetPasswordInput!): String!
   }
 
   extend type Query {
     currentUser: User
+  }
+
+  input ResetPasswordInput {
+    link: String!
+    password: String!
   }
 
   input UserRegisterInput {

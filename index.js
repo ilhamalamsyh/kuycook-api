@@ -17,5 +17,5 @@ process.on('unhandledRejection', (err) => {
 
 server.listen({ port }, () =>
   // eslint-disable-next-line no-console
-  console.log(`🚀 Server ready at http://localhost:${port}/api`)
+  console.log(`🚀 Server ready at http://localhost:${port}/api/v1`)
 );
