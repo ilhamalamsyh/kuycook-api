@@ -11,8 +11,6 @@ module.exports = gql`
     createdAt: Date!
     updatedAt: Date!
     deletedAt: Date
-    recipes: String #[Recipe!]
-    favoriteRecipe: String #[FavoriteRecipe!]
   }
 
   extend type Mutation {
