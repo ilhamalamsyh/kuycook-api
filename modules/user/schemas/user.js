@@ -1,13 +1,15 @@
-const { gql } = require('apollo-server-express');
+const {gql} = require('apollo-server-express');
 
 module.exports = gql`
   scalar Date
+  scalar DateTime
 
   type User {
     id: Int!
     fullname: String!
     gender: String!
     email: String!
+    birthDate: Date!
     createdAt: Date!
     updatedAt: Date!
     deletedAt: Date
@@ -36,6 +38,7 @@ module.exports = gql`
     email: String!
     password: String!
     gender: String!
+    birthDate: Date!
   }
 
   type AuthPayload {
@@ -48,6 +51,7 @@ module.exports = gql`
     email: String
     password: String
     gender: String
+    birthDate: Date!
     createdAt: Date
     updatedAt: Date
     deletedAt: Date
