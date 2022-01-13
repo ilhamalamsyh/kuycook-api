@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express');
+const {gql} = require('apollo-server-express');
 
 module.exports = gql`
   type Recipe {
@@ -62,7 +62,7 @@ module.exports = gql`
 
   input RecipeInput {
     title: String!
-    description: String!
+    description: String
     ingredients: [String]!
     instructions: [String]!
     image: String
@@ -82,7 +82,7 @@ module.exports = gql`
 
   input RecipeUpdateInput {
     title: String!
-    description: String!
+    description: String
     ingredients: [RecipeIngredientInput]!
     instructions: [RecipeInstructionInput]!
     image: String
