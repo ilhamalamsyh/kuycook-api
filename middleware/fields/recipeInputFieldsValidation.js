@@ -3,6 +3,8 @@ const Joi = require('joi');
 const recipeFormValidation = (
     title,
     description,
+    servings,
+    cookingTime,
     ingredients,
     instructions,
     image
@@ -15,6 +17,12 @@ const recipeFormValidation = (
             }),
             description: Joi.string().trim().min(5).messages({
                 'string.min': `Description is at least 5 characters`,
+            }),
+            servings: Joi.string().trim().min(5).messages({
+                'string.min': `Serving is at least 5 characters`,
+            }),
+            cookingTime: Joi.string().trim().min(5).messages({
+                'string.min': `Cooking time is at least 5 characters`,
             }),
             ingredients: Joi.array().items(
                 Joi.string().trim().min(3).required().messages({
@@ -33,13 +41,15 @@ const recipeFormValidation = (
             }),
         })
         .options({abortEarly: false});
-    return schema.validate(title, description, ingredients, instructions, image);
+    return schema.validate(title, description, servings, cookingTime, ingredients, instructions, image);
 };
 
 const recipeUpdateFormValidation = (
     title,
     description,
     ingredients,
+    servings,
+    cookingTime,
     instructions,
     image
 ) => {
@@ -49,9 +59,15 @@ const recipeUpdateFormValidation = (
                 'string.empty': `Please input the title`,
                 'string.min': `Title is at least 3 characters`,
             }),
-            description: Joi.string().trim().min(5).required().messages({
+            description: Joi.string().trim().min(5).messages({
                 'string.empty': `Please input the description`,
                 'string.min': `Description is at least 5 characters`,
+            }),
+            servings: Joi.string().trim().min(5).messages({
+                'string.min': `Serving is at least 5 characters`,
+            }),
+            cookingTime: Joi.string().trim().min(5).messages({
+                'string.min': `Cooking time is at least 5 characters`,
             }),
             ingredients: Joi.array().items(
                 Joi.object().keys({
