@@ -6,6 +6,8 @@ module.exports = gql`
     title: String
     description: String
     isFavorite: Boolean
+    servings: String
+    cookingTime: String
     instructions: [RecipeInstruction]!
     ingredients: [RecipeIngredient]!
     image: RecipeMedia!
@@ -66,6 +68,8 @@ module.exports = gql`
     ingredients: [String]!
     instructions: [String]!
     image: String
+    servings: String
+    cookingTime: String
   }
 
   input RecipeIngredientInput {
@@ -86,5 +90,7 @@ module.exports = gql`
     ingredients: [RecipeIngredientInput]!
     instructions: [RecipeInstructionInput]!
     image: String
+    servings: String
+    cookingTime: String
   }
 `;

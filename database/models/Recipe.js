@@ -22,6 +22,15 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.TEXT,
                 allowNull: true,
             },
+            servings: {
+                allowNull: true,
+                type: DataTypes.STRING,
+            },
+            cookingTime: {
+                allowNull: true,
+                type: DataTypes.STRING,
+                field: 'cooking_time',
+            },
             isFavorite: {
                 type: DataTypes.BOOLEAN,
                 allowNull: false,
