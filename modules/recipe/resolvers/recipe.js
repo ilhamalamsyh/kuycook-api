@@ -18,7 +18,44 @@ const {
 let t;
 module.exports = {
     Query: {
-        recipeList: async (_, {pageSize = 10, page = 0}, {user}) => {
+        recipeList: async (_, {pageSize = 10, page = 0}) => {
+            maxPageSizeValidation(pageSize);
+            const offset = setPage(pageSize, page);
+
+            try {
+                return await models.Recipe.findAll({
+                    where: {
+                        deletedAt: {
+                            [Op.is]: null,
+                        },
+                    },
+                    order: [['created_at', 'DESC']],
+                    limit: pageSize,
+                    offset,
+                    include: [
+                        {
+                            model: models.RecipeIngredient,
+                            as: 'ingredients',
+                            required: true,
+                        },
+                        {
+                            model: models.RecipeInstruction,
+                            as: 'instructions',
+                            required: true,
+                        },
+                        {
+                            model: models.RecipeMedia,
+                            as: 'image',
+                            required: true,
+                        },
+                    ],
+                });
+            } catch (err) {
+                throw new Error(err);
+            }
+        },
+
+        myRecipeList: async (_, {pageSize = 10, page = 0}, {user}) => {
             maxPageSizeValidation(pageSize);
             const offset = setPage(pageSize, page);
 
@@ -62,16 +99,10 @@ module.exports = {
             }
         },
 
-        recipeDetail: async (_, {id}, {user}) => {
+        recipeDetail: async (_, {id}) => {
             try {
-                const userId = user.id;
                 const recipe = await models.Recipe.findByPk(id, {
                     include: [
-                        {
-                            model: models.User,
-                            as: 'User',
-                            where: {id: userId},
-                        },
                         {
                             model: models.RecipeIngredient,
                             as: 'ingredients',
