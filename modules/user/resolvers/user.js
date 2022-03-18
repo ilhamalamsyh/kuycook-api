@@ -37,7 +37,6 @@ module.exports = {
             const {error} = validateRegister(args.input);
 
             if (error) {
-                console.log(`birthdate: ${error.details[0].message}`);
                 throw new UserInputError(error.details[0].message);
             }
 
@@ -57,7 +56,6 @@ module.exports = {
                     gender,
                     birthDate
                 });
-                console.log(`birthdate: ${user}`);
 
                 const token = jwt.sign(
                     {id: user.id, email: user.email},
@@ -129,12 +127,19 @@ module.exports = {
         regeneratePasswordResetLink: async (_, {email}) => {
             try {
                 const user = await models.User.findOne({where: {email}});
+
                 if (!user) {
                     throw new Error("user with given email doesn't exist");
                 }
 
                 let token = await models.Token.findOne({userId: user.id});
+
                 if (!token) {
+                    token = await models.Token.create({
+                        userId: user.id,
+                        token: crypto.randomBytes(32).toString('hex'),
+                    });
+                } else {
                     token = await models.Token.create({
                         userId: user.id,
                         token: crypto.randomBytes(32).toString('hex'),
@@ -143,7 +148,10 @@ module.exports = {
 
                 const link = `${process.env.BASE_URL}/password-reset/${user.id}/${token.token}`;
 
-                await sendEmail(user.email, 'Password Reset', link);
+                await sendEmail(user.email, 'Password Reset', link)
+                    .then((result) => console.log('Email terkirim...', result))
+                    .catch((err) => console.log('yah error deh..', err.message));
+
                 return 'Email was sent';
             } catch (err) {
                 throw new Error(err);
