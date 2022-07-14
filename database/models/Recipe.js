@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         'Recipe',
         {
             id: {
-                type: DataTypes.INTEGER.UNSIGNED,
+                type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
                 allowNull: false,
@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: false,
             },
             userId: {
-                type: DataTypes.INTEGER.UNSIGNED,
+                type: DataTypes.INTEGER,
                 allowNull: false,
             },
             createdAt: {
