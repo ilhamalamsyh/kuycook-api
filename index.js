@@ -6,6 +6,7 @@ const port = process.env.PORT || 8080;
 
 process.on('uncaughtException', (err) => {
   // eslint-disable-next-line no-console
+  console.log("yuhuu");
   console.error(`${new Date().toUTCString()} uncaughtException: ${err}`);
   process.exit(0);
 });
