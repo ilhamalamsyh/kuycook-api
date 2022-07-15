@@ -6,6 +6,7 @@ const {AuthenticationError} = require('apollo-server-express');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const {ApolloError, UserInputError} = require('apollo-server-errors');
 const crypto = require('crypto');
+const { Op } = require('sequelize');
 const models = require('../../../database/models');
 const {
     validateRegister,
@@ -111,13 +112,42 @@ module.exports = {
             }
 
             try {
-                const userUpdated = await user.update({
-                    fullname,
-                    email,
-                    password: await bcrypt.hash(password, 10),
-                    gender,
-                    birthDate
+                let userUpdated;
+                const userEmail = await models.User.findOne({
+                    where: {
+                        [Op.and] : [
+                            {email},
+                            {id}
+                        ]
+                    },
+                    attributes: ['email','id'],
                 });
+                if (userEmail) {
+                    console.log(`result: ${JSON.stringify(userEmail.email)}`);    
+                    userUpdated = await user.update({
+                        fullname,
+                        email,
+                        password: await bcrypt.hash(password, 10),
+                        gender,
+                        birthDate
+                    });
+                }else if (!userEmail) {
+                    const checkExistEmail = await models.User.findOne({
+                        where: {email},
+                        attributes: ['email']
+                    });
+                    if (checkExistEmail) {
+                        await validateEmail('Email has been user');    
+                    }
+                    userUpdated = await user.update({
+                        fullname,
+                        email,
+                        password: await bcrypt.hash(password, 10),
+                        gender,
+                        birthDate
+                    });
+                }
+
                 return userUpdated;
             } catch (err) {
                 throw new Error(`Failed update user: ${err.message}`);
