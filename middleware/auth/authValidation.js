@@ -56,7 +56,7 @@ function validateLogin(email, password) {
 
 const validateEmail = (email) => {
     if (email) {
-        throw new Error('Email has been used!');
+        throw new Error('email already registered!');
     }
 };
 
