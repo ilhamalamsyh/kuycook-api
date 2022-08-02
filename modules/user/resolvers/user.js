@@ -15,7 +15,7 @@ const {
     validateExistUser,
 } = require('../../../middleware/auth/authValidation');
 const {
-    userFormValidation,
+    userFormValidation, userUpdateFormValidation,
 } = require('../../../middleware/fields/userInputFieldsValidation');
 const sendEmail = require('../../../utils/sendEmail');
 const {
@@ -99,9 +99,9 @@ module.exports = {
         },
 
         userUpdate: async (_, {id, input}) => {
-            const {fullname, email, password, gender, birthDate} = input;
+            const {fullname, email, gender, birthDate} = input;
 
-            const {error} = userFormValidation(input);
+            const {error} = userUpdateFormValidation(input);
             if (error) {
                 throw new UserInputError(error.details[0].message);
             }
@@ -123,11 +123,9 @@ module.exports = {
                     attributes: ['email','id'],
                 });
                 if (userEmail) {
-                    console.log(`result: ${JSON.stringify(userEmail.email)}`);    
                     userUpdated = await user.update({
                         fullname,
                         email,
-                        password: await bcrypt.hash(password, 10),
                         gender,
                         birthDate
                     });
@@ -142,7 +140,6 @@ module.exports = {
                     userUpdated = await user.update({
                         fullname,
                         email,
-                        password: await bcrypt.hash(password, 10),
                         gender,
                         birthDate
                     });
