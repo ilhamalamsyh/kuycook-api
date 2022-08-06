@@ -98,7 +98,11 @@ module.exports = {
             }
         },
 
-        userUpdate: async (_, {id, input}) => {
+        userUpdate: async (_, {id, input}, {user}) => {
+            if (!user) {
+                throw new Error('You are not authenticated');
+            }
+
             const {fullname, email, gender, birthDate} = input;
 
             const {error} = userUpdateFormValidation(input);
@@ -106,8 +110,8 @@ module.exports = {
                 throw new UserInputError(error.details[0].message);
             }
 
-            const user = await models.User.findByPk(id);
-            if (!user) {
+            const currentUser = await models.User.findByPk(id);
+            if (!currentUser) {
                 throw new ApolloError('User not found');
             }
 
@@ -123,7 +127,7 @@ module.exports = {
                     attributes: ['email','id'],
                 });
                 if (userEmail) {
-                    userUpdated = await user.update({
+                    userUpdated = await currentUser.update({
                         fullname,
                         email,
                         gender,
@@ -137,7 +141,7 @@ module.exports = {
                     if (checkExistEmail) {
                         await validateEmail('Email has been user');    
                     }
-                    userUpdated = await user.update({
+                    userUpdated = await currentUser.update({
                         fullname,
                         email,
                         gender,
