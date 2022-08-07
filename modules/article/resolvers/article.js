@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { UserInputError } = require('apollo-server-errors');
+const { UserInputError, ApolloError } = require('apollo-server-errors');
 const { Op } = require('sequelize');
 const { sequelize } = require('../../../database/models');
 const models = require('../../../database/models');
@@ -30,7 +30,7 @@ module.exports = {
         });
         return articles;
       } catch (err) {
-        throw new Error(err);
+        throw new ApolloError(err);
       }
     },
 
@@ -43,12 +43,12 @@ module.exports = {
         });
 
         if (article === null || article.deletedAt !== null) {
-          throw new Error('Article not found');
+          throw new UserInputError('Article not found');
         }
 
         return article;
       } catch (err) {
-        throw new Error(err);
+        throw new ApolloError(err);
       }
     },
   },
@@ -87,7 +87,7 @@ module.exports = {
         if (t) {
           await t.rollback();
         }
-        throw new Error('Failed Create Article: ', err);
+        throw new ApolloError('Failed Create Article: ', err);
       }
     },
 
@@ -103,7 +103,7 @@ module.exports = {
       });
 
       if (article === null || article.deletedAt !== null) {
-        throw new Error('Article not found');
+        throw new UserInputError('Article not found');
       }
 
       try {
@@ -130,7 +130,7 @@ module.exports = {
         if (t) {
           await t.rollback();
         }
-        throw new Error('Failed Update Article', err);
+        throw new ApolloError('Failed Update Article', err);
       }
     },
 
@@ -140,7 +140,7 @@ module.exports = {
       });
 
       if (article === null || article.deletedAt !== null) {
-        throw new Error('Error: Article Not Found');
+        throw new UserInputError('Error: Article Not Found');
       }
 
       try {
@@ -150,7 +150,7 @@ module.exports = {
         );
         return article;
       } catch (err) {
-        throw new Error('Failed Delete Article');
+        throw new ApolloError('Failed Delete Article');
       }
     },
   },

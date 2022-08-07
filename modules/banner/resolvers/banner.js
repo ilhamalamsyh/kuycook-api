@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { UserInputError } = require('apollo-server-errors');
+const { UserInputError, ApolloError } = require('apollo-server-errors');
 const { Op } = require('sequelize');
 const models = require('../../../database/models');
 const {
@@ -28,7 +28,7 @@ module.exports = {
         });
         return banners;
       } catch (err) {
-        throw new Error(err);
+        throw new ApolloError(err);
       }
     },
 
@@ -37,11 +37,11 @@ module.exports = {
         const banner = await models.Banner.findByPk(id);
 
         if (banner === null || banner.deletedAt !== null) {
-          throw new Error('Banner not found');
+          throw new UserInputError('Banner not found');
         }
         return banner;
       } catch (err) {
-        throw new Error(err);
+        throw new ApolloError(err);
       }
     },
   },
@@ -61,7 +61,7 @@ module.exports = {
 
         return await models.Banner.findByPk(bannerId);
       } catch (err) {
-        throw new Error('Failed Create Banner', err);
+        throw new ApolloError('Failed Create Banner', err);
       }
     },
 
@@ -75,14 +75,14 @@ module.exports = {
       const banner = await models.Banner.findByPk(id);
 
       if (banner === null || banner.deletedAt !== null) {
-        throw new Error('Banner not found');
+        throw new UserInputError('Banner not found');
       }
 
       try {
         await banner.update({ title, image }, { where: { id } });
         return banner;
       } catch (err) {
-        throw new Error('Failed Update Article: ', err);
+        throw new ApolloError('Failed Update Article: ', err);
       }
     },
 
@@ -90,14 +90,14 @@ module.exports = {
       const banner = await models.Banner.findByPk(id);
 
       if (banner === null || banner.deletedAt !== null) {
-        throw new Error('Banner not found');
+        throw new UserInputError('Banner not found');
       }
 
       try {
         await banner.update({ deletedAt: Date.now() }, { where: { id } });
         return banner;
       } catch (err) {
-        throw new Error('Failed Delete Banner', err);
+        throw new ApolloError('Failed Delete Banner', err);
       }
     },
   },
