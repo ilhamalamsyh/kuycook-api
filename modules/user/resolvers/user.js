@@ -26,10 +26,14 @@ module.exports = {
     Query: {
         currentUser: async (_, args, {user}) => {
             if (!user) {
-                throw new Error('You are not authenticated');
+                throw new AuthenticationError('You are not authenticated');
             }
-            const me = models.User.findByPk(user.id);
-            return me;
+            try {
+                const me = models.User.findByPk(user.id);
+                return me;
+            } catch (e) {
+                throw new ApolloError(e);
+            }
         },
     },
     Mutation: {
@@ -71,7 +75,7 @@ module.exports = {
                     user,
                 };
             } catch (err) {
-                throw new AuthenticationError(err.message);
+                throw new ApolloError(err.message);
             }
         },
 
@@ -94,13 +98,13 @@ module.exports = {
                 );
                 return {token, user};
             } catch (err) {
-                throw new AuthenticationError(err.message);
+                throw new ApolloError(err.message);
             }
         },
 
         userUpdate: async (_, {id, input}, {user}) => {
             if (!user) {
-                throw new Error('You are not authenticated');
+                throw new AuthenticationError('You are not authenticated');
             }
 
             const {fullname, email, gender, birthDate} = input;
@@ -112,7 +116,7 @@ module.exports = {
 
             const currentUser = await models.User.findByPk(id);
             if (!currentUser) {
-                throw new ApolloError('User not found');
+                throw new UserInputError('User not found');
             }
 
             try {
@@ -151,7 +155,7 @@ module.exports = {
 
                 return userUpdated;
             } catch (err) {
-                throw new Error(`Failed update user: ${err.message}`);
+                throw new ApolloError(`Failed update user: ${err.message}`);
             }
         },
 
@@ -160,7 +164,7 @@ module.exports = {
                 const user = await models.User.findOne({where: {email}});
 
                 if (!user) {
-                    throw new Error("user with given email doesn't exist");
+                    throw new Error("User with given email doesn't exist");
                 }
 
                 let token = await models.Token.findOne({userId: user.id});
@@ -185,7 +189,7 @@ module.exports = {
 
                 return 'Email was sent';
             } catch (err) {
-                throw new Error(err);
+                throw new ApolloError(err);
             }
         },
 
@@ -206,7 +210,7 @@ module.exports = {
             try {
                 const user = await models.User.findByPk(id);
                 if (!user) {
-                    throw new Error('User not found');
+                    throw new UserInputError('User not found');
                 }
                 const token = await models.Token.findOne({
                     userId: user.id,
@@ -230,7 +234,7 @@ module.exports = {
 
                 return 'Password reset successfully.';
             } catch (err) {
-                throw new Error(err);
+                throw new ApolloError(err);
             }
         },
     },

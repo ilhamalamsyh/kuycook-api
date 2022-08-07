@@ -2,8 +2,8 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable prefer-const */
 // eslint-disable-next-line import/no-extraneous-dependencies
-const {UserInputError} = require('apollo-server-errors');
-const {Op} = require('sequelize');
+const { UserInputError, ApolloError } = require('apollo-server-errors');
+const { Op } = require('sequelize');
 const {sequelize} = require('../../../database/models');
 const models = require('../../../database/models');
 const {
@@ -51,7 +51,7 @@ module.exports = {
                     ],
                 });
             } catch (err) {
-                throw new Error(err);
+                throw new ApolloError(err);
             }
         },
 
@@ -95,7 +95,7 @@ module.exports = {
                     ],
                 });
             } catch (err) {
-                throw new Error(err);
+                throw new ApolloError(err);
             }
         },
 
@@ -122,11 +122,11 @@ module.exports = {
                 });
 
                 if (recipe === null || recipe.deletedAt !== null) {
-                    throw new Error('Recipe not found');
+                    throw new UserInputError('Recipe not found');
                 }
                 return recipe;
             } catch (error) {
-                throw new Error(error);
+                throw new ApolloError(error);
             }
         },
 
@@ -173,7 +173,7 @@ module.exports = {
                 });
                 return recipes;
             } catch (error) {
-                throw new Error(error);
+                throw new ApolloError(error);
             }
         },
     },
@@ -261,7 +261,7 @@ module.exports = {
                 if (t) {
                     await t.rollback();
                 }
-                throw new Error('Failed Create Recipe: ', err);
+                throw new ApolloError('Failed Create Recipe: ', err);
             }
         },
 
@@ -284,9 +284,9 @@ module.exports = {
             });
 
             if (recipe == null || recipe.deletedAt !== null) {
-                throw new Error('Recipe not found');
+                throw new UserInputError('Recipe not found');
             } else if (recipe.userId != userId) {
-                throw new Error('Recipe not found for this user id.');
+                throw new UserInputError('Recipe not found for this user id.');
             }
 
             const recipeId = recipe.id;
@@ -309,7 +309,7 @@ module.exports = {
                 ingredients.forEach((ingredient) => {
                     const recipeIngredientRecipeId = parseInt(ingredient.recipeId, 10);
                     if (recipeIngredientRecipeId !== recipeId) {
-                        throw new Error('Recipe id of recipe ingredient id not found.');
+                        throw new UserInputError('Recipe id of recipe ingredient id not found.');
                     }
                     // TODO (Ilham): validate recipe ingredient id not found
                 });
@@ -321,7 +321,7 @@ module.exports = {
                 instructions.forEach((instruction) => {
                     const recipeInstructionRecipeId = parseInt(instruction.recipeId, 10);
                     if (recipeInstructionRecipeId !== recipeId) {
-                        throw new Error('Recipe id of recipe instruction id not found.');
+                        throw new UserInputError('Recipe id of recipe instruction id not found.');
                     }
                     // TODO (Ilham): validate recipe instruction id not found
                 });
@@ -366,7 +366,7 @@ module.exports = {
                             {where: {id: ingredient.id}, transaction: t}
                         );
                     } else {
-                        throw new Error('Recipe IngredientId not found.');
+                        throw new UserInputError('Recipe Ingredient ID not found.');
                     }
 
                     return modifyIngredients;
@@ -398,7 +398,7 @@ module.exports = {
                             }
                         );
                     } else {
-                        throw new Error('Recipe InstructionID not found.');
+                        throw new UserInputError('Recipe Instruction ID not found.');
                     }
                     return modifyInstructions;
                 });
@@ -442,7 +442,7 @@ module.exports = {
                 if (t) {
                     await t.rollback();
                 }
-                throw new Error(err);
+                throw new ApolloError(err);
             }
         },
 
@@ -475,7 +475,7 @@ module.exports = {
             });
 
             if (recipe === null || recipe.deletedAt !== null) {
-                throw new Error('Recipe Not Found');
+                throw new UserInputError('Recipe Not Found');
             }
 
             try {
@@ -517,7 +517,7 @@ module.exports = {
             });
 
             if (recipe === null || recipe.deletedAt !== null) {
-                throw new Error('Recipe Not Found');
+                throw new UserInputError('Recipe Not Found');
             }
 
             try {
@@ -528,7 +528,7 @@ module.exports = {
                 }
                 return recipe;
             } catch (err) {
-                throw new Error(err);
+                throw new ApolloError(err);
             }
         },
     },
