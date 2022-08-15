@@ -633,45 +633,35 @@ module.exports = {
                 throw new Error('Failed delete recipe: ', err);
             }
         },
-        addFavoriteRecipe: async (_, {id}, {user}) => {
+        addRemoveFavoriteRecipe: async (_, {id}, {user}) => {
             const userId = user.id;
-
-            const recipe = await models.Recipe.findByPk(id, {
-                include: [
-                    {
-                        model: models.User,
-                        as: 'User',
-                        where: {id: userId},
-                    },
-                    {
-                        model: models.RecipeIngredient,
-                        as: 'ingredients',
-                        required: true,
-                    },
-                    {
-                        model: models.RecipeInstruction,
-                        as: 'instructions',
-                        required: true,
-                    },
-                    {
-                        model: models.RecipeMedia,
-                        as: 'image',
-                        required: true,
-                    },
-                ],
-            });
-
-            if (recipe === null || recipe.deletedAt !== null) {
-                throw new UserInputError('Recipe Not Found');
-            }
+            let message;
 
             try {
-                if (recipe.isFavorite === false) {
-                    recipe.update({isFavorite: true});
-                } else {
-                    recipe.update({isFavorite: false});
+                const existingFavoriteRecipe = await models.FavoriteRecipe.findOne({
+                    where: {
+                        [Op.and] : [
+                            {recipeId: id},
+                            {userId}
+                         ]
+                    }
+                });
+                
+                if (existingFavoriteRecipe) {
+                    await models.FavoriteRecipe.destroy({where: {
+                        id: existingFavoriteRecipe.id
+                    }});
+                    message = 'Delete from bookmark'
                 }
-                return recipe;
+                if (!existingFavoriteRecipe) {
+                    await models.FavoriteRecipe.create({
+                        recipeId: id,
+                        userId
+                    });
+                    message = 'Save to bookmark'
+                }    
+
+                return message;
             } catch (err) {
                 throw new ApolloError(err);
             }
