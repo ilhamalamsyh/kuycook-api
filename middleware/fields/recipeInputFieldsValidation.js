@@ -18,10 +18,10 @@ const recipeFormValidation = (
             description: Joi.string().trim().min(5).messages({
                 'string.min': `Description is at least 5 characters`,
             }),
-            servings: Joi.string().trim().min(5).messages({
+            servings: Joi.string().trim().min(1).messages({
                 'string.min': `Serving is at least 5 characters`,
             }),
-            cookingTime: Joi.string().trim().min(5).messages({
+            cookingTime: Joi.string().trim().min(1).messages({
                 'string.min': `Cooking time is at least 5 characters`,
             }),
             ingredients: Joi.array().items(
