@@ -21,7 +21,7 @@ module.exports = gql`
     recipeCreate(input: RecipeInput!): Recipe!
     recipeUpdate(id: ID!, input: RecipeInput!): Recipe
     recipeDelete(id: ID!): Recipe
-    addFavoriteRecipe(id: ID!): Recipe
+    addRemoveFavoriteRecipe(id: ID!): String
   }
 
   extend type Query {
