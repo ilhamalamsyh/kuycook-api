@@ -1,5 +1,4 @@
 /* eslint-disable eqeqeq */
-/* eslint-disable no-plusplus */
 /* eslint-disable prefer-const */
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { UserInputError, ApolloError } = require('apollo-server-errors');
@@ -8,7 +7,6 @@ const {sequelize} = require('../../../database/models');
 const models = require('../../../database/models');
 const {
     recipeFormValidation,
-    recipeUpdateFormValidation,
 } = require('../../../middleware/fields/recipeInputFieldsValidation');
 const {
     maxPageSizeValidation,
@@ -23,7 +21,7 @@ module.exports = {
             const offset = setPage(pageSize, page);
 
             try {
-                return await models.Recipe.findAll({
+                const recipes = await models.Recipe.findAll({
                     where: {
                         deletedAt: {
                             [Op.is]: null,
@@ -37,11 +35,21 @@ module.exports = {
                             model: models.RecipeIngredient,
                             as: 'ingredients',
                             required: true,
+                            where: {
+                                deletedAt: {
+                                    [Op.is]: null,
+                                },
+                            },
                         },
                         {
                             model: models.RecipeInstruction,
                             as: 'instructions',
                             required: true,
+                            where: {
+                                deletedAt: {
+                                    [Op.is]: null,
+                                },
+                            },
                         },
                         {
                             model: models.RecipeMedia,
@@ -50,6 +58,25 @@ module.exports = {
                         },
                     ],
                 });
+
+                const getAllRecipes = recipes.map((recipe) => {
+                    const author = models.User.findByPk(recipe.userId);
+                    return {
+                        id: recipe.id,
+                        title: recipe.title,
+                        description: recipe.description,
+                        isFavorite: recipe.isFavorite,
+                        servings: recipe.servings,
+                        cookingTime: recipe.cookingTime,
+                        ...recipe,
+                        author,
+                        createdAt: recipe.createdAt,
+                        updatedAt: recipe.updatedAt,
+                        deletedAt: recipe.deletedAt,
+                    }
+                });
+
+                return await getAllRecipes;
             } catch (err) {
                 throw new ApolloError(err);
             }
@@ -81,11 +108,21 @@ module.exports = {
                             model: models.RecipeIngredient,
                             as: 'ingredients',
                             required: true,
+                            where: {
+                                deletedAt: {
+                                    [Op.is]: null,
+                                },
+                            },
                         },
                         {
                             model: models.RecipeInstruction,
                             as: 'instructions',
                             required: true,
+                            where: {
+                                deletedAt: {
+                                    [Op.is]: null,
+                                },
+                            },
                         },
                         {
                             model: models.RecipeMedia,
@@ -107,11 +144,21 @@ module.exports = {
                             model: models.RecipeIngredient,
                             as: 'ingredients',
                             required: true,
+                            where: {
+                                deletedAt: {
+                                    [Op.is]: null,
+                                },
+                            }
                         },
                         {
                             model: models.RecipeInstruction,
                             as: 'instructions',
                             required: true,
+                            where: {
+                                deletedAt: {
+                                    [Op.is]: null,
+                                },
+                            }
                         },
                         {
                             model: models.RecipeMedia,
@@ -124,7 +171,21 @@ module.exports = {
                 if (recipe === null || recipe.deletedAt !== null) {
                     throw new UserInputError('Recipe not found');
                 }
-                return recipe;
+                const author = await models.User.findByPk(recipe.userId);
+
+                return {
+                    id: recipe.id,
+                    title: recipe.title,
+                    description: recipe.description,
+                    isFavorite: recipe.isFavorite,
+                    servings: recipe.servings,
+                    cookingTime: recipe.cookingTime,
+                    ...recipe,
+                    author,
+                    createdAt: recipe.createdAt,
+                    updatedAt: recipe.updatedAt,
+                    deletedAt: recipe.deletedAt,
+                };
             } catch (error) {
                 throw new ApolloError(error);
             }
@@ -244,11 +305,21 @@ module.exports = {
                             model: models.RecipeIngredient,
                             as: 'ingredients',
                             required: true,
+                            where: {
+                                deletedAt: {
+                                    [Op.is]: null,
+                                },
+                            },
                         },
                         {
                             model: models.RecipeInstruction,
                             as: 'instructions',
                             require: true,
+                            where: {
+                                deletedAt: {
+                                    [Op.is]: null,
+                                },
+                            },
                         },
                         {
                             model: models.RecipeMedia,
@@ -268,7 +339,7 @@ module.exports = {
         recipeUpdate: async (_, {id, input}, {user}) => {
             const userId = user.id;
             const {title, description, ingredients, instructions, image, servings, cookingTime} = input;
-            const {error} = await recipeUpdateFormValidation(input);
+            const {error} = await recipeFormValidation(input);
             if (error) {
                 throw new UserInputError(error.details[0].message);
             }
@@ -278,6 +349,16 @@ module.exports = {
                     {
                         model: models.RecipeMedia,
                         as: 'image',
+                        required: true,
+                    },
+                    {
+                        model: models.RecipeIngredient,
+                        as: 'ingredients',
+                        required: true,
+                    },
+                    {
+                        model: models.RecipeInstruction,
+                        as: 'instructions',
                         required: true,
                     },
                 ],
@@ -292,41 +373,74 @@ module.exports = {
             const recipeId = recipe.id;
 
             const recipeIngredients = await models.RecipeIngredient.findAll({
-                where: {recipeId},
-                attributes: ['id', 'recipeId'],
+                where: {
+                    [Op.and] : [
+                        {recipeId},
+                        {deletedAt: {
+                                [Op.is]: null,
+                            },
+                        }
+                     ]
+                },
+                attributes: ['id', 'recipeId','deletedAt'],
             });
+            await recipeIngredients.map((recipeIngredient) => recipeIngredient.update(
+                    {deletedAt: Date.now()},
+                    {returning: true, plain: true}
+                ));
 
-            const recipeInstruction = await models.RecipeInstruction.findAll({
-                where: {recipeId},
-                attributes: ['id', 'recipeId'],
+            const recipeInstructions = await models.RecipeInstruction.findAll({
+                where: {
+                    [Op.and] : [
+                        {recipeId},
+                        {deletedAt: {
+                                [Op.is]: null,
+                            },
+                        }
+                     ]
+                },
+                attributes: ['id', 'recipeId', 'deletedAt'],
             });
+            await recipeInstructions.map((recipeInstruction) => recipeInstruction.update(
+                    {deletedAt: Date.now()},
+                    {returning: true, plain: true}
+                ));
+            // const recipeIngredients = await models.RecipeIngredient.findAll({
+            //     where: {recipeId},
+            //     attributes: ['id', 'recipeId'],
+            // });
 
-            let recipeIngredientExistingIds = [];
-            let recipeInstructionExistingIds = [];
+            // const recipeInstruction = await models.RecipeInstruction.findAll({
+            //     where: {recipeId},
+            //     attributes: ['id', 'recipeId'],
+            // });
 
-            for (let i = 0; i < recipeIngredients.length; i++) {
-                const recipeIngredientId = recipeIngredients[i].id;
-                ingredients.forEach((ingredient) => {
-                    const recipeIngredientRecipeId = parseInt(ingredient.recipeId, 10);
-                    if (recipeIngredientRecipeId !== recipeId) {
-                        throw new UserInputError('Recipe id of recipe ingredient id not found.');
-                    }
-                    // TODO (Ilham): validate recipe ingredient id not found
-                });
-                recipeIngredientExistingIds.push(recipeIngredientId);
-            }
+            // let recipeIngredientExistingIds = [];
+            // let recipeInstructionExistingIds = [];
 
-            for (let i = 0; i < recipeInstruction.length; i++) {
-                const recipeInstructionId = recipeInstruction[i].id;
-                instructions.forEach((instruction) => {
-                    const recipeInstructionRecipeId = parseInt(instruction.recipeId, 10);
-                    if (recipeInstructionRecipeId !== recipeId) {
-                        throw new UserInputError('Recipe id of recipe instruction id not found.');
-                    }
-                    // TODO (Ilham): validate recipe instruction id not found
-                });
-                recipeInstructionExistingIds.push(recipeInstructionId);
-            }
+            // for (let i = 0; i < recipeIngredients.length; i++) {
+            //     const recipeIngredientId = recipeIngredients[i].id;
+            //     ingredients.forEach((ingredient) => {
+            //         const recipeIngredientRecipeId = parseInt(ingredient.recipeId, 10);
+            //         if (recipeIngredientRecipeId !== recipeId) {
+            //             throw new UserInputError('Recipe id of recipe ingredient id not found.');
+            //         }
+            //         // TODO (Ilham): validate recipe ingredient id not found
+            //     });
+            //     recipeIngredientExistingIds.push(recipeIngredientId);
+            // }
+
+            // for (let i = 0; i < recipeInstruction.length; i++) {
+            //     const recipeInstructionId = recipeInstruction[i].id;
+            //     instructions.forEach((instruction) => {
+            //         const recipeInstructionRecipeId = parseInt(instruction.recipeId, 10);
+            //         if (recipeInstructionRecipeId !== recipeId) {
+            //             throw new UserInputError('Recipe id of recipe instruction id not found.');
+            //         }
+            //         // TODO (Ilham): validate recipe instruction id not found
+            //     });
+            //     recipeInstructionExistingIds.push(recipeInstructionId);
+            // }
 
             try {
                 t = await sequelize.transaction();
@@ -342,68 +456,89 @@ module.exports = {
                     }
                 );
 
-                // update or create new recipe ingredients
-                await ingredients.forEach(async (ingredient) => {
-                    let modifyIngredients;
-                    let recipeIngredientId = parseInt(ingredient.id, 10);
+                // // update or create new recipe ingredients
+                // await ingredients.forEach(async (ingredient) => {
+                //     let modifyIngredients;
+                //     let recipeIngredientId = parseInt(ingredient.id, 10);
 
-                    if (ingredient.id == '' || ingredient.id === null) {
-                        modifyIngredients = await models.RecipeIngredient.create(
-                            {
-                                ingredient: ingredient.ingredient,
-                                recipeId: ingredient.recipeId,
-                            },
-                            {transaction: t}
-                        );
-                    }
+                //     if (ingredient.id == '' || ingredient.id === null) {
+                //         modifyIngredients = await models.RecipeIngredient.create(
+                //             {
+                //                 ingredient: ingredient.ingredient,
+                //                 recipeId: ingredient.recipeId,
+                //             },
+                //             {transaction: t}
+                //         );
+                //     }
 
-                    if (recipeIngredientExistingIds.includes(recipeIngredientId)) {
-                        modifyIngredients = await models.RecipeIngredient.update(
-                            {
-                                ingredient: ingredient.ingredient,
-                                recipeId: ingredient.recipeId,
-                            },
-                            {where: {id: ingredient.id}, transaction: t}
-                        );
-                    } else {
-                        throw new UserInputError('Recipe Ingredient ID not found.');
-                    }
+                //     if (recipeIngredientExistingIds.includes(recipeIngredientId)) {
+                //         modifyIngredients = await models.RecipeIngredient.update(
+                //             {
+                //                 ingredient: ingredient.ingredient,
+                //                 recipeId: ingredient.recipeId,
+                //             },
+                //             {where: {id: ingredient.id}, transaction: t}
+                //         );
+                //     } else {
+                //         throw new UserInputError('Recipe Ingredient ID not found.');
+                //     }
 
-                    return modifyIngredients;
-                });
+                //     return modifyIngredients;
+                // });
 
-                // Update or Create recipe instructions
-                await instructions.forEach(async (instruction) => {
-                    let modifyInstructions;
-                    let recipeInstructionId = parseInt(instruction.id, 10);
+                // // Update or Create recipe instructions
+                // await instructions.forEach(async (instruction) => {
+                //     let modifyInstructions;
+                //     let recipeInstructionId = parseInt(instruction.id, 10);
 
-                    if (instruction.id == '' || instruction.id === null) {
-                        modifyInstructions = await models.RecipeInstruction.create(
-                            {
-                                instruction: instruction.instruction,
-                                recipeId: instruction.recipeId,
-                            },
-                            {transaction: t}
-                        );
-                    }
-                    if (recipeInstructionExistingIds.includes(recipeInstructionId)) {
-                        modifyInstructions = await models.RecipeInstruction.update(
-                            {
-                                instruction: instruction.instruction,
-                                recipeId: instruction.recipeId,
-                            },
-                            {
-                                where: {id: instruction.id},
-                                transaction: t,
-                            }
-                        );
-                    } else {
-                        throw new UserInputError('Recipe Instruction ID not found.');
-                    }
-                    return modifyInstructions;
-                });
+                //     if (instruction.id == '' || instruction.id === null) {
+                //         modifyInstructions = await models.RecipeInstruction.create(
+                //             {
+                //                 instruction: instruction.instruction,
+                //                 recipeId: instruction.recipeId,
+                //             },
+                //             {transaction: t}
+                //         );
+                //     }
+                //     if (recipeInstructionExistingIds.includes(recipeInstructionId)) {
+                //         modifyInstructions = await models.RecipeInstruction.update(
+                //             {
+                //                 instruction: instruction.instruction,
+                //                 recipeId: instruction.recipeId,
+                //             },
+                //             {
+                //                 where: {id: instruction.id},
+                //                 transaction: t,
+                //             }
+                //         );
+                //     } else {
+                //         throw new UserInputError('Recipe Instruction ID not found.');
+                //     }
+                //     return modifyInstructions;
+                // });
 
                 /// update image
+
+                // create ingredients
+                const modifyIngredients = ingredients.map((ingredient) => ({
+                    ingredient,
+                    recipeId
+                }));
+                await models.RecipeIngredient.bulkCreate(modifyIngredients,{
+                    transaction: t,
+                    returning: true
+                });
+
+                // create instructions
+                const modifyInstructions = instructions.map((instruction) => ({
+                    instruction,
+                    recipeId
+                }));
+                await models.RecipeInstruction.bulkCreate(modifyInstructions, {
+                    transaction: t,
+                    returning: true
+                });
+
                 await models.RecipeMedia.update(
                     {
                         url: image,
@@ -423,11 +558,21 @@ module.exports = {
                             model: models.RecipeIngredient,
                             as: 'ingredients',
                             required: true,
+                            where: {
+                                deletedAt: {
+                                    [Op.is]: null,
+                                },
+                            }
                         },
                         {
                             model: models.RecipeInstruction,
                             as: 'instructions',
                             required: true,
+                            where: {
+                                deletedAt: {
+                                    [Op.is]: null,
+                                },
+                            }
                         },
                         {
                             model: models.RecipeMedia,
@@ -442,7 +587,7 @@ module.exports = {
                 if (t) {
                     await t.rollback();
                 }
-                throw new ApolloError(err);
+                throw new ApolloError('Failed update recipe: ', err);
             }
         },
 

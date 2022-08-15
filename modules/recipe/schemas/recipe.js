@@ -11,6 +11,7 @@ module.exports = gql`
     instructions: [RecipeInstruction]!
     ingredients: [RecipeIngredient]!
     image: RecipeMedia!
+    author: User
     createdAt: Date
     updatedAt: Date
     deletedAt: Date
@@ -18,7 +19,7 @@ module.exports = gql`
   
   extend type Mutation {
     recipeCreate(input: RecipeInput!): Recipe!
-    recipeUpdate(id: ID!, input: RecipeUpdateInput!): Recipe
+    recipeUpdate(id: ID!, input: RecipeInput!): Recipe
     recipeDelete(id: ID!): Recipe
     addFavoriteRecipe(id: ID!): Recipe
   }
