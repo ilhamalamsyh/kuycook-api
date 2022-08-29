@@ -33,7 +33,7 @@ const userFormValidation = (fullname, email, password, gender) => {
     return schema.validate(fullname, email, password, gender);
 };
 
-const userUpdateFormValidation = (fullname, email, gender) => {
+const userUpdateFormValidation = (fullname, email, gender, birthDate, image) => {
     const schema = Joi.object()
         .keys({
             fullname: Joi.string().trim().min(8).required().messages({
@@ -56,9 +56,10 @@ const userUpdateFormValidation = (fullname, email, gender) => {
                 'string.max': 'Select Gender',
             }),
             birthDate: Joi.date().max('now').min('1947-01-01'),
+            image: Joi.string().allow('')
         })
         .options({abortEarly: false});
-    return schema.validate(fullname, email, gender);
+    return schema.validate(fullname, email, gender, birthDate, image);
 };
 
 module.exports = { userFormValidation, userUpdateFormValidation };

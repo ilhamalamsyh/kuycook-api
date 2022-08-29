@@ -38,7 +38,7 @@ module.exports = {
     },
     Mutation: {
         register: async (_, args) => {
-            const {fullname, email, password, gender, birthDate} = args.input;
+            const {fullname, email, password, gender, birthDate, image} = args.input;
             const {error} = validateRegister(args.input);
 
             if (error) {
@@ -59,7 +59,8 @@ module.exports = {
                     email,
                     password: hashedPassword,
                     gender,
-                    birthDate
+                    birthDate,
+                    image
                 });
 
                 const token = jwt.sign(
@@ -107,7 +108,7 @@ module.exports = {
                 throw new AuthenticationError('You are not authenticated');
             }
 
-            const {fullname, email, gender, birthDate} = input;
+            const {fullname, email, gender, birthDate, image} = input;
 
             const {error} = userUpdateFormValidation(input);
             if (error) {
@@ -135,7 +136,8 @@ module.exports = {
                         fullname,
                         email,
                         gender,
-                        birthDate
+                        birthDate,
+                        image
                     });
                 }else if (!userEmail) {
                     const checkExistEmail = await models.User.findOne({
@@ -149,7 +151,8 @@ module.exports = {
                         fullname,
                         email,
                         gender,
-                        birthDate
+                        birthDate,
+                        image
                     });
                 }
 

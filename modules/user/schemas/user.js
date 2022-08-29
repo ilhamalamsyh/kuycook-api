@@ -10,6 +10,7 @@ module.exports = gql`
     gender: String!
     email: String!
     birthDate: Date!
+    image: String
     createdAt: Date!
     updatedAt: Date!
     deletedAt: Date
@@ -39,6 +40,7 @@ module.exports = gql`
     password: String!
     gender: String!
     birthDate: Date!
+    image: String
   }
 
   type AuthPayload {
@@ -51,6 +53,7 @@ module.exports = gql`
     email: String
     password: String
     gender: String
+    image: String
     birthDate: Date!
     createdAt: Date
     updatedAt: Date

@@ -31,6 +31,7 @@ function validateRegister(register) {
             'string.max': 'Select Gender',
         }),
         birthDate: Joi.date().max('now').min('1947-01-01'),
+        image: Joi.string().allow('')
     });
     return schema.validate(register, {abortEarly: false});
 }
