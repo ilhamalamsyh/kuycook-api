@@ -16,6 +16,7 @@
     "apollo-server-express": "^2.25.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "cucumber": "^6.0.7",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "googleapis": "^88.2.0",
