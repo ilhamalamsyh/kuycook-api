@@ -25,10 +25,22 @@ module.exports = gql`
   }
 
   extend type Query {
-    recipeList(pageSize: Int, page: Int): [Recipe]
+    recipeList(pageSize: Int, page: Int): RecipeListData
     myRecipeList(pageSize: Int, page: Int): [Recipe]
     recipeDetail(id: ID!): Recipe
     favoriteRecipeList(pageSize: Int, page: Int): [Recipe]
+  }
+
+  type RecipeListData {
+    recipes: [Recipe],
+    meta: MetaData
+  }
+
+  type MetaData {
+    pageSize: Int,
+    currentPage: Int,
+    total: Int,
+    totalPage: Int
   }
 
   type RecipeInstruction {

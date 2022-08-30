@@ -59,6 +59,14 @@ module.exports = {
                     ],
                 });
 
+                const count = await models.Recipe.count({
+                    where: {
+                        deletedAt: {
+                            [Op.is]: null,
+                        },
+                    },
+                })
+
                 const getAllRecipes = recipes.map((recipe) => {
                     const author = models.User.findByPk(recipe.userId);
                     return {
@@ -76,7 +84,17 @@ module.exports = {
                     }
                 });
 
-                return await getAllRecipes;
+                const metaData = {
+                    pageSize,
+                    currentPage: page,
+                    total: count,
+                    totalPage: Math.ceil(count / pageSize)
+                }
+                
+                return await {
+                    recipes: getAllRecipes,
+                    meta: metaData
+                };
             } catch (err) {
                 throw new ApolloError(err);
             }
