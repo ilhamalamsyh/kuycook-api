@@ -5,7 +5,7 @@
 // eslint-disable-next-line strict
 'use strict';
 
-require('dotenv').config();
+require('dotenv').config({ silent: process.env.NODE_ENV === 'production' })
 
 const fs = require('fs');
 const path = require('path');

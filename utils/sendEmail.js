@@ -1,7 +1,7 @@
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-promise-reject-errors */
-require('dotenv').config();
+require('dotenv').config({ silent: process.env.NODE_ENV === 'production' })
 const nodemailer = require('nodemailer');
 const {google} = require('googleapis');
 
