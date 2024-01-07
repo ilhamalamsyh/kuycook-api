@@ -5,3 +5,5 @@ package-lock.json
 database/.DS_Store
 graphql/.DS_Store
 modules/.DS_Store
+.idea
+.DS_Store
