@@ -1,6 +1,6 @@
-require('dotenv').config({ silent: process.env.NODE_ENV === 'production' })
+require('dotenv').config();
 
-const server = require('./api/server');
+const server = require('./api/index');
 
 const port = process.env.PORT || 8080;
 
