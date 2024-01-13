@@ -27,7 +27,7 @@ module.exports = {
                 throw new UserInputError(error.message);
             }
 
-            const uniqueFilename = generateUniqueFilename(filename);
+            const uniqueFilename = generateUniqueFilename();
             let response = '';
 
             try {
