@@ -17,7 +17,7 @@ const {
 const {
     userFormValidation, userUpdateFormValidation,
 } = require('../../../middleware/fields/userInputFieldsValidation');
-const sendEmail = require('../../../utils/sendEmail');
+const sendEmail = require('../../../shared/utils/sendEmail');
 const {
     resetPasswordValidate,
 } = require('../../../middleware/fields/resetPasswordInputField');
