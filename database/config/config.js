@@ -8,6 +8,11 @@ module.exports = {
     database: process.env.DEV_DB_NAME,
     host: process.env.DEV_DB_HOST,
     dialect: 'postgres',
+    dialectOptions:{
+      ssl:{
+        require: true
+      }
+    },
     use_env_variable: process.env.DEV_DATABASE_URL,
   },
   test: {
@@ -23,6 +28,11 @@ module.exports = {
     password: process.env.PROD_DB_PASS,
     database: process.env.PROD_DB_NAME,
     host: process.env.PROD_DB_HOST,
-    dialectModule: pg
+    dialectModule: pg,
+    dialectOptions:{
+      ssl:{
+        require: true
+      }
+    },
   },
 };
