@@ -78,6 +78,7 @@ module.exports = {
                         cookingTime: recipe.cookingTime,
                         ...recipe,
                         author,
+                        test: 'helloWorld',
                         createdAt: recipe.createdAt,
                         updatedAt: recipe.updatedAt,
                         deletedAt: recipe.deletedAt,
