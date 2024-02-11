@@ -12,6 +12,7 @@ module.exports = gql`
     ingredients: [RecipeIngredient]!
     image: RecipeMedia!
     author: User
+    test: String
     createdAt: Date
     updatedAt: Date
     deletedAt: Date
