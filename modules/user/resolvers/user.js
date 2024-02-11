@@ -25,6 +25,7 @@ const {
 module.exports = {
     Query: {
         currentUser: async (_, args, {user}) => {
+            console.log(user);
             if (!user) {
                 throw new AuthenticationError('You are not authenticated');
             }
